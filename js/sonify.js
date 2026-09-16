@@ -80,6 +80,7 @@
   function initSolarFlow() {
     const canvas = document.getElementById('solar-flow-canvas');
     if (!canvas) return;
+    if (document.documentElement.classList.contains('is-mobile')) return; // hidden on phones; save the battery
     const section = canvas.closest('.section');
     const ctx = canvas.getContext('2d');
     const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;

@@ -561,3 +561,85 @@ html.modal-open { overflow: hidden !important; }
 .form-modal-close:hover { opacity: 1; }
 .form-modal-panel .form-embed { flex: 1; max-width: none; min-height: 0; }
 .form-modal-panel .form-embed iframe { width: 100%; height: 100%; border: 0; border-radius: 0; display: block; }
+
+/* Video titles on page 3 link out; styled as the title itself, gold only on hover */
+.fig-title-link { color: inherit; text-decoration: none; }
+.fig-title-link:hover { opacity: 1; color: var(--accent); }
+
+/* Play the Sun page: Sonara's purple theme warmed to the site's orange/gold */
+#stem-music { --purple: #e8913c; }
+
+/* ============================================================
+   MOBILE (html.is-mobile, set once at load for phones <= 768px)
+   Sonara locks phones out; here the lockout is replaced with a
+   normal vertical scroll: every page stacks, full width, auto height.
+   ============================================================ */
+html.is-mobile { overflow: visible !important; overflow-y: auto !important; height: auto !important; scroll-snap-type: none !important; }
+html.is-mobile body { overflow: visible !important; height: auto !important; }
+.is-mobile #mobile-overlay { display: none !important; }
+.is-mobile #vision, .is-mobile #education, .is-mobile #citizen-science,
+.is-mobile #stem-music, .is-mobile #contact, .is-mobile #qr { display: flex !important; }
+.is-mobile .dot-nav, .is-mobile .scroll-hint, .is-mobile .section-down-cue, .is-mobile #cursor-glow { display: none !important; }
+.is-mobile .hero-tagline, .is-mobile .hero-expansion { display: block !important; }
+.is-mobile .hero-audio-meta { display: flex !important; }
+
+/* Sections: natural height, comfortable padding */
+.is-mobile .section {
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 4.5rem 1.25rem;
+  scroll-snap-align: none;
+  overflow: hidden;
+}
+.is-mobile .section::before, .is-mobile .section::after { height: 10vh; }
+
+/* Content always visible on phones (no scroll-snap reveal timing to rely on) */
+.is-mobile .pg-content, .is-mobile .wwr-content, .is-mobile .music-content, .is-mobile .qr-content {
+  opacity: 1 !important; transform: none !important; padding: 0; max-width: 100%;
+}
+.is-mobile .music-bg, .is-mobile .vision-bg { opacity: 1 !important; }
+
+/* Hero: one full phone screen */
+.is-mobile #hero { height: 100svh !important; min-height: 100svh !important; padding: 0; }
+.is-mobile .hero-inner { padding: 1.5rem 1.25rem; }
+.is-mobile .hero-title { font-size: 2.7rem; white-space: normal; letter-spacing: 0.12em; line-height: 1.05; }
+.is-mobile .hero-expansion { font-size: 0.8rem; letter-spacing: 0.12em; }
+.is-mobile .hero-tagline { font-size: 1rem; margin-bottom: 2rem; }
+
+/* Type scale */
+.is-mobile .section-label { font-size: 0.78rem; letter-spacing: 0.18em; margin-bottom: 0.9rem; }
+.is-mobile .pg-head { max-width: 100%; }
+.is-mobile .pg-title { font-size: 1.9rem; }
+.is-mobile .pg-title-lg { font-size: 2.3rem; }
+.is-mobile .pg-body { font-size: 1rem; }
+
+/* Videos and split layouts stack */
+.is-mobile .yt-wide, .is-mobile .yt-fig .yt, .is-mobile .pg-split .pg-right .yt { max-width: 100%; }
+.is-mobile .yt-pair, .is-mobile .pg-split, .is-mobile .pg-cards, .is-mobile .wwr-top { grid-template-columns: 1fr; gap: 1.5rem; }
+.is-mobile .pg-split .pg-body { max-width: 100%; }
+.is-mobile .pg-stats { gap: 2rem; }
+.is-mobile .yt-play { width: 68px; height: 68px; }
+
+/* Play the Sun: cards stack; sequencer scrolls sideways so cells stay tappable */
+.is-mobile .music-title { font-size: 2.4rem; }
+.is-mobile .instruments-grid { grid-template-columns: 1fr !important; gap: 1.25rem; }
+.is-mobile .seq-toolbar { flex-wrap: wrap; justify-content: center; }
+.is-mobile .sequencer-visual { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.is-mobile .seq-grid { min-width: 560px; }
+.is-mobile .sun-breath { width: 120px; height: 120px; }
+
+/* Work with Robert: portrait centered, logos 2x4, CTA stacked */
+.is-mobile #solar-flow-canvas { display: none; }
+.is-mobile .wwr-content { gap: 1.75rem; }
+.is-mobile .wwr-top { justify-items: center; text-align: center; }
+.is-mobile .wwr-photo { height: auto; width: min(68vw, 300px); aspect-ratio: 2 / 3; }
+.is-mobile .wwr-right { align-items: center; }
+.is-mobile .wwr-title { font-size: 2rem; }
+.is-mobile .wwr-sub { font-size: 0.72rem; line-height: 1.7; }
+.is-mobile .wwr-logos { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; max-width: 100%; width: 100%; }
+.is-mobile .wwr-logo { height: 58px; min-width: 0; padding: 0.4rem 0.5rem; }
+.is-mobile .wwr-logo img { max-width: 100%; max-height: 38px; }
+.is-mobile .wwr-logo .wordmark { font-size: 0.55rem; }
+.is-mobile .wwr-body { font-size: 1.05rem; }
+.is-mobile .wwr-cta { flex-direction: column; align-items: flex-start; gap: 0.9rem; }
+.is-mobile .wwr-btn { width: 100%; text-align: center; }

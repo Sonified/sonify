@@ -148,6 +148,7 @@ window.SONIFY = {
     document.querySelectorAll('[data-link="googleForm"]').forEach(btn => {
       btn.addEventListener('click', e => {
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return; // respect open-in-new-tab gestures
+        if (document.documentElement.classList.contains('is-mobile')) return; // phones: open the form itself, no modal
         e.preventDefault();
         openModal();
       });
