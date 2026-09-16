@@ -439,26 +439,52 @@
 /* Hero hint auto-armed on load: chevron only until the solar wind is playing (then Sonara's show-copy reveals the data caption) */
 .scroll-hint.chevron-only:not(.show-copy) .scroll-hint-text { opacity: 0 !important; filter: blur(6px) !important; }
 
-/* ----- QR page (only with ?qr=1): big, centered, high contrast for a projector ----- */
-.page-qr { background: #000; }
-.page-qr::before, .page-qr::after { display: none; }
-.qr-content { display: flex; flex-direction: column; align-items: center; gap: 1.4rem; }
+/* ----- QR page (only with ?qr=1): quiet, on-brand, easy to scan ----- */
+.page-qr { background: var(--bg); }
+.qr-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 42% 48% at 50% 52%, rgba(212, 168, 67, 0.16), transparent 70%),
+    radial-gradient(ellipse 70% 60% at 50% 110%, rgba(74, 143, 212, 0.10), transparent 70%);
+}
+.qr-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+.section.in-view .qr-content { opacity: 1; transform: translateY(0); }
+.qr-content .section-label { margin-bottom: 0.4rem; }
+.qr-card {
+  padding: clamp(10px, 1.6vh, 18px);
+  background: #fff;
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 1px rgba(212, 168, 67, 0.4),
+    0 0 60px rgba(212, 168, 67, 0.18),
+    0 30px 80px rgba(0, 0, 0, 0.6);
+}
 .qr-img {
-  width: min(70vh, 70vw);
+  width: min(34vh, 34vw, 320px);
   height: auto;
   display: block;
-  background: #fff;
-  padding: clamp(12px, 2vh, 24px);
-  border-radius: 12px;
   image-rendering: pixelated; /* keep modules crisp when scaled */
 }
 .qr-caption {
-  font-size: clamp(1.4rem, 2.6vw, 2.2rem);
+  font-size: clamp(1.3rem, 2.2vw, 1.9rem);
   font-weight: 300;
-  letter-spacing: 0.06em;
-  color: #fff;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  margin-top: 0.4rem;
 }
-.qr-sub { font-family: var(--font-mono); font-size: 0.85rem; letter-spacing: 0.18em; color: var(--accent); text-transform: lowercase; }
+.qr-sub { font-family: var(--font-mono); font-size: 0.8rem; letter-spacing: 0.18em; color: var(--accent); }
 
 /* ----- Inline Google Form modal ----- */
 html.modal-open { overflow: hidden !important; }
