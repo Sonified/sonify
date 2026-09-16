@@ -6144,7 +6144,7 @@ function initCSCanvas() {
     const amplitude = h * 0.15;
 
     // Draw main waveform
-    c.strokeStyle = 'rgba(58, 181, 160, 0.3)';
+    c.strokeStyle = 'rgba(232, 145, 60, 0.3)';
     c.lineWidth = 1.5 + waveThicknessBoost;
     c.beginPath();
     for (let x = 0; x < w; x++) {
@@ -6158,7 +6158,7 @@ function initCSCanvas() {
     c.stroke();
 
     // Second waveform layer
-    c.strokeStyle = 'rgba(58, 181, 160, 0.15)';
+    c.strokeStyle = 'rgba(232, 145, 60, 0.15)';
     c.lineWidth = 1 + waveThicknessBoost * 0.45;
     c.beginPath();
     for (let x = 0; x < w; x++) {
@@ -6195,13 +6195,13 @@ function initCSCanvas() {
       const radius = 3 + pulse * 6;
       const alpha = (0.25 + pulse * 0.3) * envelope;
 
-      c.fillStyle = `rgba(58, 181, 160, ${alpha})`;
+      c.fillStyle = `rgba(232, 145, 60, ${alpha})`;
       c.beginPath();
       c.arc(px, py, radius, 0, Math.PI * 2);
       c.fill();
 
       // Outer ring
-      c.strokeStyle = `rgba(58, 181, 160, ${alpha * 0.4})`;
+      c.strokeStyle = `rgba(232, 145, 60, ${alpha * 0.4})`;
       c.lineWidth = 1;
       c.beginPath();
       c.arc(px, py, radius + 8 + pulse * 5, 0, Math.PI * 2);
@@ -6474,7 +6474,7 @@ function initSynthWave() {
 
     // Glow layer
     const glowAlpha = 0.06 + liveBlend * 0.14;
-    c.strokeStyle = `rgba(139, 110, 192, ${glowAlpha})`;
+    c.strokeStyle = `rgba(232, 145, 60, ${glowAlpha})`;
     c.lineWidth = 5 + liveBlend * 3;
     c.beginPath();
     for (let x = 0; x < w; x++) {
@@ -6484,7 +6484,7 @@ function initSynthWave() {
     c.stroke();
 
     // Sharp line
-    c.strokeStyle = `rgba(139, 110, 192, ${0.28 + liveBlend * 0.62})`;
+    c.strokeStyle = `rgba(232, 145, 60, ${0.28 + liveBlend * 0.62})`;
     c.lineWidth = 1.5 + liveBlend * 0.5;
     c.beginPath();
     for (let x = 0; x < w; x++) {
@@ -6497,7 +6497,7 @@ function initSynthWave() {
     c.lineTo(w, centerY);
     c.lineTo(0, centerY);
     c.closePath();
-    c.fillStyle = `rgba(139, 110, 192, ${0.025 + liveBlend * 0.055})`;
+    c.fillStyle = `rgba(232, 145, 60, ${0.025 + liveBlend * 0.055})`;
     c.fill();
 
   }
@@ -6624,16 +6624,16 @@ function initSpectrumCanvas() {
 
       // Main bar
       const grad = c.createLinearGradient(x, centerY, x, centerY - barHeight);
-      grad.addColorStop(0, `rgba(139, 110, 192, ${alpha * 0.3})`);
-      grad.addColorStop(0.5, `rgba(139, 110, 192, ${alpha})`);
-      grad.addColorStop(1, `rgba(180, 150, 220, ${alpha * 0.6})`);
+      grad.addColorStop(0, `rgba(232, 145, 60, ${alpha * 0.3})`);
+      grad.addColorStop(0.5, `rgba(232, 145, 60, ${alpha})`);
+      grad.addColorStop(1, `rgba(255, 196, 120, ${alpha * 0.6})`);
 
       c.fillStyle = grad;
       c.fillRect(x + 1, centerY - barHeight, barWidth - 2, barHeight);
 
       // Mirror reflection below (fainter)
       const mirrorGrad = c.createLinearGradient(x, centerY, x, centerY + barHeight * 0.4);
-      mirrorGrad.addColorStop(0, `rgba(139, 110, 192, ${alpha * 0.2})`);
+      mirrorGrad.addColorStop(0, `rgba(232, 145, 60, ${alpha * 0.2})`);
       mirrorGrad.addColorStop(1, 'transparent');
       c.fillStyle = mirrorGrad;
       c.fillRect(x + 1, centerY, barWidth - 2, barHeight * 0.4);

@@ -1082,7 +1082,7 @@ a:hover { opacity: 0.7; }
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 30% 60%, rgba(139, 110, 192, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 30% 60%, rgba(232, 145, 60, 0.06) 0%, transparent 50%),
     radial-gradient(ellipse at 70% 30%, rgba(212, 168, 67, 0.04) 0%, transparent 50%);
   opacity: 0;
   transition: opacity 1.5s ease;
@@ -1144,7 +1144,7 @@ a:hover { opacity: 0.7; }
 }
 
 .instrument-card:hover {
-  border-color: rgba(139, 110, 192, 0.2);
+  border-color: rgba(232, 145, 60, 0.2);
 }
 
 .instrument-card h3 {
@@ -1196,9 +1196,9 @@ a:hover { opacity: 0.7; }
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(160, 130, 210, 0.9);
-  background: rgba(60, 45, 90, 0.6);
-  border: 1px solid rgba(120, 100, 170, 0.4);
+  color: rgba(240, 170, 95, 0.9);
+  background: rgba(70, 40, 18, 0.6);
+  border: 1px solid rgba(190, 120, 55, 0.4);
   border-radius: 4px;
   padding: 0.3rem 0.7rem;
   cursor: pointer;
@@ -1219,43 +1219,43 @@ a:hover { opacity: 0.7; }
 
 @keyframes seqPlayPulse {
   0%, 100% {
-    border-color: rgba(120, 100, 170, 0.3);
-    background: rgba(60, 45, 90, 0.5);
-    box-shadow: 0 0 6px rgba(139, 110, 192, 0), 0 0 20px rgba(139, 110, 192, 0);
+    border-color: rgba(190, 120, 55, 0.3);
+    background: rgba(70, 40, 18, 0.5);
+    box-shadow: 0 0 6px rgba(232, 145, 60, 0), 0 0 20px rgba(232, 145, 60, 0);
   }
   50% {
-    border-color: rgba(120, 100, 170, 0.6);
-    background: rgba(60, 45, 90, 0.7);
-    box-shadow: 0 0 8px rgba(139, 110, 192, 0.4), 0 0 24px rgba(139, 110, 192, 0.15);
+    border-color: rgba(190, 120, 55, 0.6);
+    background: rgba(70, 40, 18, 0.7);
+    box-shadow: 0 0 8px rgba(232, 145, 60, 0.4), 0 0 24px rgba(232, 145, 60, 0.15);
   }
 }
 
 .seq-play:hover,
 .seq-loop:hover,
 .seq-randomize:hover {
-  background: rgba(60, 45, 90, 0.75);
-  border-color: rgba(120, 100, 170, 0.55);
+  background: rgba(70, 40, 18, 0.75);
+  border-color: rgba(190, 120, 55, 0.55);
 }
 
 .seq-loop {
-  color: rgba(160, 130, 210, 0.55);
-  background: rgba(60, 45, 90, 0.35);
-  border-color: rgba(120, 100, 170, 0.25);
+  color: rgba(240, 170, 95, 0.55);
+  background: rgba(70, 40, 18, 0.35);
+  border-color: rgba(190, 120, 55, 0.25);
 }
 
 .seq-loop.active {
-  color: rgba(160, 130, 210, 0.9);
-  background: rgba(60, 45, 90, 0.6);
-  border: 1px solid rgba(120, 100, 170, 0.4);
-  box-shadow: 0 0 6px rgba(139, 110, 192, 0.2);
+  color: rgba(240, 170, 95, 0.9);
+  background: rgba(70, 40, 18, 0.6);
+  border: 1px solid rgba(190, 120, 55, 0.4);
+  box-shadow: 0 0 6px rgba(232, 145, 60, 0.2);
 }
 .seq-toolbar { gap: 0.5rem; }
 
 .seq-loop.flash {
-  color: rgba(160, 130, 210, 1);
-  background: rgba(160, 130, 210, 0.45);
-  border-color: rgba(160, 130, 210, 0.7);
-  box-shadow: 0 0 10px rgba(139, 110, 192, 0.5);
+  color: rgba(240, 170, 95, 1);
+  background: rgba(240, 170, 95, 0.45);
+  border-color: rgba(240, 170, 95, 0.7);
+  box-shadow: 0 0 10px rgba(232, 145, 60, 0.5);
 }
 
 /* Sequencer visual */
@@ -1277,7 +1277,7 @@ a:hover { opacity: 0.7; }
   padding-right: 6px;
   white-space: nowrap;
 }
-.seq-row-syn .seq-label { color: rgba(160, 130, 210, 1); }
+.seq-row-syn .seq-label { color: rgba(240, 170, 95, 1); }
 .seq-row-hat .seq-label { color: rgba(80, 190, 190, 1); }
 .seq-row-kck .seq-label { color: rgba(212, 168, 67, 1); }
 
@@ -1291,19 +1291,19 @@ a:hover { opacity: 0.7; }
 }
 
 /* Row-colored inactive cells */
-.seq-row-syn .seq-cell { background: rgba(160, 130, 210, 0.06); border-color: rgba(160, 130, 210, 0.1); }
+.seq-row-syn .seq-cell { background: rgba(240, 170, 95, 0.06); border-color: rgba(240, 170, 95, 0.1); }
 .seq-row-hat .seq-cell { background: rgba(80, 190, 190, 0.06); border-color: rgba(80, 190, 190, 0.1); }
 .seq-row-kck .seq-cell { background: rgba(212, 168, 67, 0.06); border-color: rgba(212, 168, 67, 0.1); }
 
 /* Synth rows — purple */
 .seq-row-syn .seq-cell.active {
-  background: rgba(139, 110, 192, 0.3);
-  border-color: rgba(139, 110, 192, 0.4);
+  background: rgba(232, 145, 60, 0.3);
+  border-color: rgba(232, 145, 60, 0.4);
 }
 .seq-row-syn .seq-cell.active.lit {
-  background: rgba(139, 110, 192, 0.85);
-  border-color: rgba(180, 150, 230, 0.9);
-  box-shadow: 0 0 10px rgba(139, 110, 192, 0.5);
+  background: rgba(232, 145, 60, 0.85);
+  border-color: rgba(255, 196, 120, 0.9);
+  box-shadow: 0 0 10px rgba(232, 145, 60, 0.5);
 }
 
 /* Hat row — cyan/teal */
@@ -1359,23 +1359,23 @@ a:hover { opacity: 0.7; }
   font-size: 0.6rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(160, 130, 210, 0.55);
-  background: rgba(60, 45, 90, 0.35);
-  border: 1px solid rgba(120, 100, 170, 0.25);
+  color: rgba(240, 170, 95, 0.55);
+  background: rgba(70, 40, 18, 0.35);
+  border: 1px solid rgba(190, 120, 55, 0.25);
   border-radius: 4px;
   padding: 0.2rem 0.5rem;
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
 .synth-fx-btn:hover {
-  background: rgba(60, 45, 90, 0.55);
-  border-color: rgba(120, 100, 170, 0.4);
+  background: rgba(70, 40, 18, 0.55);
+  border-color: rgba(190, 120, 55, 0.4);
 }
 .synth-fx-btn.active {
-  color: rgba(160, 130, 210, 0.9);
-  background: rgba(60, 45, 90, 0.6);
-  border: 1px solid rgba(120, 100, 170, 0.4);
-  box-shadow: 0 0 6px rgba(139, 110, 192, 0.2);
+  color: rgba(240, 170, 95, 0.9);
+  background: rgba(70, 40, 18, 0.6);
+  border: 1px solid rgba(190, 120, 55, 0.4);
+  box-shadow: 0 0 6px rgba(232, 145, 60, 0.2);
 }
 
 .wt-prefix {
@@ -1404,7 +1404,7 @@ a:hover { opacity: 0.7; }
   top: calc(100% + 4px);
   left: 0;
   background: #111118;
-  border: 1px solid rgba(139, 110, 192, 0.3);
+  border: 1px solid rgba(232, 145, 60, 0.3);
   border-radius: 6px;
   padding: 0.3rem 0;
   z-index: 50;
@@ -1430,7 +1430,7 @@ a:hover { opacity: 0.7; }
 }
 
 .wt-list button:hover {
-  background: rgba(139, 110, 192, 0.15);
+  background: rgba(232, 145, 60, 0.15);
   color: var(--purple);
 }
 
