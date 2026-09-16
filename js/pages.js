@@ -19,24 +19,25 @@
 window.SONIFY = {
   PAGE_ORDER: [
     'hero',              // Sound Science title + solar wind
+    'nasa-video',        // Listen To SPACE (NASA Video)
+    'audio-production',  // HARP + Edgar Mitchell VR
+    'pop',               // JVKE golden hour + sample pack + Rolling Stone
     'synth',             // Sequencer + wavetable synth (from Sonara)
     'work-with-robert',  // Headshot, logos, contact
-    // Available but not shown by default (add back here, or use ?pages=...):
-    //   'nasa-video'        Listen To SPACE (NASA Video)
-    //   'audio-production'  HARP + Edgar Mitchell VR
-    //   'pop'               JVKE golden hour + sample pack + Rolling Stone
   ],
 
   LINKS: {
     // Public share link to the Solar Sample Pack zip (Dropbox / Drive / GitHub release)
-    samplePack: '',
+    samplePack: 'https://data.now.audio/samples/Solar_Sample_Pack_I.zip',
 
     // Google Form URL for "Start a conversation". Blank = falls back to email.
-    googleForm: '',
+    googleForm: 'https://docs.google.com/forms/d/e/1FAIpQLSf0D42jndoFzznXSsRWfbnjAB_u8ek0O-mHcxKnZ_7bdJG1SQ/viewform',
 
-    // Optional: the Google Form *embed* URL (the one ending in ?embedded=true).
-    // When set, the form renders inline under the CTA instead of opening a tab.
-    googleFormEmbed: '',
+    // The Google Form *embed* URL (the one ending in ?embedded=true).
+    // When set, "Start a conversation" opens the form inline in a modal over the
+    // page (the last page is a fixed 100vh section, so it cannot grow to hold a
+    // form). Blank it to have the button open the form in a new tab instead.
+    googleFormEmbed: 'https://docs.google.com/forms/d/e/1FAIpQLSf0D42jndoFzznXSsRWfbnjAB_u8ek0O-mHcxKnZ_7bdJG1SQ/viewform?embedded=true',
 
     rollingStone: 'https://www.rollingstone.co.uk/culture/tiktok-star-jvke-announces-new-version-of-golden-hour-featuring-sounds-from-nasa-library-29304/',
     email: 'mailto:robert@auralab.io',
@@ -50,10 +51,15 @@ window.SONIFY = {
   if (!main) return;
 
   // ----- 1. Page order -----
-  const param = new URLSearchParams(location.search).get('pages');
-  const order = param
+  const qs = new URLSearchParams(location.search);
+  const param = qs.get('pages');
+  const order = (param
     ? param.split(',').map(s => s.trim()).filter(Boolean)
-    : cfg.PAGE_ORDER;
+    : cfg.PAGE_ORDER).slice();
+
+  // ?qr=1 appends the QR page after everything else (presentation mode: scroll
+  // one past the end to reveal the code). Never shown otherwise.
+  if (qs.get('qr') === '1' && !order.includes('qr')) order.push('qr');
 
   const all = Array.from(main.querySelectorAll('section[data-page]'));
   const byName = new Map(all.map(s => [s.dataset.page, s]));
@@ -95,14 +101,56 @@ window.SONIFY = {
     }
   });
 
-  // ----- 3. Optional inline Google Form -----
+  // ----- 3. Inline Google Form (modal) -----
+  // #form-embed fills with the form iframe and is presented as a modal over the
+  // page when the CTA is clicked. The CTA keeps its real href, so middle-click,
+  // no-JS, and the secondary email link all still work.
   const embed = document.getElementById('form-embed');
   if (embed && cfg.LINKS.googleFormEmbed) {
     const iframe = document.createElement('iframe');
-    iframe.src = cfg.LINKS.googleFormEmbed;
-    iframe.title = 'Contact form';
+    iframe.title = 'Start a conversation';
     iframe.loading = 'lazy';
     embed.appendChild(iframe);
+
+    const modal = document.createElement('div');
+    modal.id = 'form-modal';
+    modal.hidden = true;
+    modal.innerHTML = `
+      <div class="form-modal-backdrop" data-close></div>
+      <div class="form-modal-panel" role="dialog" aria-modal="true" aria-label="Start a conversation">
+        <div class="form-modal-bar">
+          <span class="form-modal-title">Start a conversation</span>
+          <a class="form-modal-newtab" href="${cfg.LINKS.googleForm || cfg.LINKS.googleFormEmbed}" target="_blank" rel="noopener">Open in new tab</a>
+          <button type="button" class="form-modal-close" data-close aria-label="Close">&times;</button>
+        </div>
+      </div>`;
+    modal.querySelector('.form-modal-panel').appendChild(embed);
     embed.hidden = false;
+    document.body.appendChild(modal);
+
+    let lastFocus = null;
+    function openModal() {
+      if (!iframe.src) iframe.src = cfg.LINKS.googleFormEmbed; // load on first open
+      lastFocus = document.activeElement;
+      modal.hidden = false;
+      document.documentElement.classList.add('modal-open');
+      requestAnimationFrame(() => modal.classList.add('is-open'));
+    }
+    function closeModal() {
+      modal.classList.remove('is-open');
+      document.documentElement.classList.remove('modal-open');
+      setTimeout(() => { modal.hidden = true; }, 250);
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+    modal.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', closeModal));
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
+
+    document.querySelectorAll('[data-link="googleForm"]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return; // respect open-in-new-tab gestures
+        e.preventDefault();
+        openModal();
+      });
+    });
   }
 })();

@@ -145,7 +145,7 @@
   max-width: 1200px;
 }
 .yt-fig { margin: 0; display: flex; flex-direction: column; gap: 0.9rem; }
-.yt-fig .yt { max-width: calc((100vh - 420px) * 1.7778); margin: 0 auto; }
+.yt-fig .yt { max-width: calc((100vh - 470px) * 1.7778); margin: 0 auto; }
 .yt-fig figcaption { display: flex; flex-direction: column; gap: 0.25rem; text-align: center; }
 .yt-fig figcaption strong { font-weight: 500; font-size: 1.05rem; }
 .yt-fig figcaption span {
@@ -325,10 +325,11 @@
 }
 
 .wwr-logos {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.8rem;
   margin-top: 1.9rem;
+  max-width: 640px;
 }
 .wwr-logo {
   height: 66px;
@@ -348,11 +349,11 @@
   max-width: 130px;
   object-fit: contain;
   display: block;
-  filter: grayscale(1) brightness(1.55) contrast(0.92);
-  opacity: 0.82;
-  transition: filter 0.35s ease, opacity 0.35s ease;
+  opacity: 0.92;
+  transition: opacity 0.35s ease;
 }
-.wwr-logo:hover img { filter: none; opacity: 1; }
+.wwr-logo:hover img { opacity: 1; }
+.wwr-logo .wordmark { text-align: center; white-space: normal; line-height: 1.35; font-size: 0.7rem; }
 
 .wwr-bottom { display: flex; flex-direction: column; gap: 1.25rem; max-width: 900px; }
 .wwr-body {
@@ -396,16 +397,16 @@
 }
 
 /* Logo variants: dark artwork on transparent → invert; artwork on a white box → invert + screen (box disappears) */
-.wwr-logo img.logo-dark { filter: invert(1) grayscale(1) brightness(1.05); }
-.wwr-logo:hover img.logo-dark { filter: invert(1); }
-.wwr-logo img.logo-onwhite { filter: invert(1) grayscale(1) brightness(1.05); mix-blend-mode: screen; }
-.wwr-logo:hover img.logo-onwhite { filter: invert(1) hue-rotate(180deg); }
+/* Color logos: dark artwork on transparent gets inverted to white; artwork on a white box keeps its colors
+   by inverting twice through hue-rotate, with screen blending so the white box vanishes into the card. */
+.wwr-logo img.logo-dark { filter: invert(1); }
+.wwr-logo img.logo-onwhite { filter: invert(1) hue-rotate(180deg); mix-blend-mode: screen; }
 
 /* The hidden attribute must win over any display rule (logo fallbacks rely on it). */
 [hidden] { display: none !important; }
 
 /* Bigger, less blown-out treatment for detailed seals */
-.wwr-logo img.logo-seal { max-height: 54px; filter: grayscale(1) brightness(1.25) contrast(1.05); }
+.wwr-logo img.logo-seal { max-height: 54px; }
 .wwr-logo img.logo-onwhite { max-height: 54px; }
 
 /* Data-source list on the synth page: 5 rows must fit the height-matched visual */
@@ -414,3 +415,75 @@
 
 /* Shimmer layer mirrors the title text from data-text (Sonara hardcodes 'SONARA'). */
 .hero-title .glow-wrap::after { content: attr(data-text); }
+
+/* Ghost jump link: quiet shortcut to the final page (one conversion point, two hallways) */
+.ghost-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.6rem;
+  padding: 0;
+  border: 0;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(212, 168, 67, 0.62);
+  background: transparent;
+  transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease, opacity 0.3s ease;
+}
+.ghost-link:hover { opacity: 1; color: var(--accent); }
+.ghost-arrow { transition: transform 0.3s ease; }
+.ghost-link:hover .ghost-arrow { transform: translateX(3px); }
+
+/* Hero hint auto-armed on load: chevron only until the solar wind is playing (then Sonara's show-copy reveals the data caption) */
+.scroll-hint.chevron-only:not(.show-copy) .scroll-hint-text { opacity: 0 !important; filter: blur(6px) !important; }
+
+/* ----- QR page (only with ?qr=1): big, centered, high contrast for a projector ----- */
+.page-qr { background: #000; }
+.page-qr::before, .page-qr::after { display: none; }
+.qr-content { display: flex; flex-direction: column; align-items: center; gap: 1.4rem; }
+.qr-img {
+  width: min(70vh, 70vw);
+  height: auto;
+  display: block;
+  background: #fff;
+  padding: clamp(12px, 2vh, 24px);
+  border-radius: 12px;
+  image-rendering: pixelated; /* keep modules crisp when scaled */
+}
+.qr-caption {
+  font-size: clamp(1.4rem, 2.6vw, 2.2rem);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  color: #fff;
+}
+.qr-sub { font-family: var(--font-mono); font-size: 0.85rem; letter-spacing: 0.18em; color: var(--accent); text-transform: lowercase; }
+
+/* ----- Inline Google Form modal ----- */
+html.modal-open { overflow: hidden !important; }
+#form-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 3vh 2vw; opacity: 0; transition: opacity 0.25s ease; }
+#form-modal.is-open { opacity: 1; }
+.form-modal-backdrop { position: absolute; inset: 0; background: rgba(6, 6, 8, 0.88); }
+.form-modal-panel {
+  position: relative;
+  width: min(760px, 100%);
+  height: min(92vh, 900px);
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(212, 168, 67, 0.35);
+  transform: translateY(12px);
+  transition: transform 0.25s ease;
+}
+#form-modal.is-open .form-modal-panel { transform: translateY(0); }
+.form-modal-bar { display: flex; align-items: center; gap: 1rem; padding: 0.6rem 0.75rem 0.6rem 1.1rem; background: var(--bg-card); color: var(--text); }
+.form-modal-title { font-family: var(--font-mono); font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); flex: 1; }
+.form-modal-newtab { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.06em; color: var(--text-dim); }
+.form-modal-newtab:hover { color: var(--accent); opacity: 1; }
+.form-modal-close { background: none; border: 0; color: var(--text); font-size: 1.6rem; line-height: 1; cursor: pointer; padding: 0 0.4rem; opacity: 0.7; }
+.form-modal-close:hover { opacity: 1; }
+.form-modal-panel .form-embed { flex: 1; max-width: none; min-height: 0; }
+.form-modal-panel .form-embed iframe { width: 100%; height: 100%; border: 0; border-radius: 0; display: block; }

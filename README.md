@@ -43,13 +43,22 @@ http://localhost:3334/?pages=hero,synth,work-with-robert
 The `id` on each `<section>` is what Sonara's `visuals.js` / `main.js` key on
 for backgrounds and audio. Keep the id, rename the page with `data-page`.
 
+## Presentation mode: QR page
+
+Add `?qr=1` to the URL and one extra page appears after the last one: a big
+white QR code on black, sized for a projector. Normal visitors never see it.
+
+```
+https://sonify.now.audio/?qr=1
+```
+
 ## Links to fill in
 
 Also in [js/pages.js](js/pages.js), under `LINKS`:
 
 - `samplePack` – public link to the Solar Sample Pack zip. Until set, the card shows "Download link coming soon".
-- `googleForm` – Google Form URL for "Start a conversation". Until set, the button falls back to email.
-- `googleFormEmbed` – optional embed URL (`...?embedded=true`) to render the form inline under the CTA.
+- `googleForm` – Google Form URL for "Start a conversation" (set). Blank = falls back to email.
+- `googleFormEmbed` – embed URL (`...?embedded=true`, set). When set, the button opens the form in a modal over the page; blank it to open a new tab instead.
 
 ## Logos
 
