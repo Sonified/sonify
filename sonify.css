@@ -688,3 +688,12 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 /* Phone: extra breathing room around the Listen to Space page */
 .is-mobile #education { padding-top: 9rem; padding-bottom: 7.5rem; }
 .is-mobile #education .pg-content { gap: 1.75rem; }
+
+/* ----- Mobile pass 4: generous top/bottom room, videos as inset tiles ----- */
+.is-mobile .section { padding-top: 8.5rem; padding-bottom: 7.5rem; }
+.is-mobile .section::before, .is-mobile .section::after { height: 5vh; }
+.is-mobile #hero { padding-top: 0; padding-bottom: 0; }
+.is-mobile #education { padding-top: 9.5rem; padding-bottom: 8rem; }
+.is-mobile #citizen-science { padding-top: 9.5rem; padding-bottom: 9rem; }
+.is-mobile .yt { width: 92%; max-width: 92%; margin-inline: auto; border-radius: 12px; }
+.is-mobile .yt-fig .yt, .is-mobile .pg-split .pg-right .yt { width: 92%; max-width: 92%; }
