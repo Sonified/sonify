@@ -717,6 +717,9 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 .is-mobile .seq-label { font-size: 0.55rem; padding-right: 3px; letter-spacing: 0; }
 .is-mobile .seq-cell { aspect-ratio: auto; height: 26px; }
 
+/* Keep the last page's footer close to the bottom of the mobile document. */
+.is-mobile #pages > .section.is-last { padding-bottom: 1.5rem; }
+
 /* ----- Rising starfield behind every page after the hero ----- */
 #edu-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 #hero { background: var(--bg); z-index: 1; }   /* opaque hero hides the starfield until you scroll */
