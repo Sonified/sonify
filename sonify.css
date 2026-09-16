@@ -662,3 +662,20 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 .is-mobile #citizen-science .pg-stats { order: 4; margin-top: 0.25rem; }
 .is-mobile #citizen-science .pg-cards { order: 5; margin-top: 0; }
 .is-mobile #citizen-science .pg-body, .is-mobile #citizen-science .pg-right .pg-caption { display: none !important; }
+
+/* ----- Mobile pass 3: Play the Sun ----- */
+.is-mobile .seq-toolbar { justify-content: flex-start; }
+/* Grid fits inside the card border: no forced width, tighter gap and padding */
+.is-mobile .sequencer-visual { overflow: hidden; }
+.is-mobile .seq-grid { min-width: 0; gap: 2px; padding: 0.5rem 0.6rem 0.4rem; }
+.is-mobile .seq-cell { min-width: 0; }
+.is-mobile .seq-label { font-size: 0.6rem; padding-right: 4px; }
+/* Shorter visuals (JS matches heights inline, so these need !important) */
+.is-mobile .synth-visual { height: 110px !important; }
+.is-mobile .catalog-visual { height: 120px !important; }
+.is-mobile .synth-fx-btns { display: none !important; }
+.is-mobile .sun-breath { width: 96px; height: 96px; }
+/* Tighter card text */
+.is-mobile .instrument-card h3 { padding: 0.9rem 1.15rem 0.35rem; font-size: 1rem; }
+.is-mobile .instrument-card p { padding: 0 1.15rem 1rem; font-size: 0.85rem; line-height: 1.5; }
+.is-mobile .music-content { gap: 1.5rem; }
