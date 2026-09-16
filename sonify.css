@@ -679,3 +679,8 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 .is-mobile .instrument-card h3 { padding: 0.9rem 1.15rem 0.35rem; font-size: 1rem; }
 .is-mobile .instrument-card p { padding: 0 1.15rem 1rem; font-size: 0.85rem; line-height: 1.5; }
 .is-mobile .music-content { gap: 1.5rem; }
+
+/* Phone hero: show the data caption that fades up under Listen; keep the chevron hidden */
+.is-mobile .scroll-hint { display: flex !important; }
+.is-mobile .scroll-hint .section-down-chevron { display: none !important; }
+.is-mobile .scroll-hint-text { font-size: 0.72rem; }
