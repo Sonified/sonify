@@ -697,3 +697,16 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 .is-mobile #citizen-science { padding-top: 9.5rem; padding-bottom: 9rem; }
 .is-mobile .yt { width: 92%; max-width: 92%; margin-inline: auto; border-radius: 12px; }
 .is-mobile .yt-fig .yt, .is-mobile .pg-split .pg-right .yt { width: 92%; max-width: 92%; }
+
+/* ----- Mobile pass 5 ----- */
+/* Sonara sets page padding by id (#vision { padding: 0 } etc.), which outranks
+   .is-mobile .section. Match that specificity so every page gets the same room. */
+.is-mobile #vision, .is-mobile #stem-music, .is-mobile #contact, .is-mobile #qr,
+.is-mobile #education, .is-mobile #citizen-science { padding: 9.5rem 1.25rem 8.5rem; }
+.is-mobile #hero { padding: 0; }
+
+/* Sequencer: 16 cells fit inside the card border, cells taller than wide so they stay tappable */
+.is-mobile #stem-music { padding-left: 0.75rem; padding-right: 0.75rem; }
+.is-mobile .seq-grid { gap: 2px; padding: 0.5rem 0.5rem 0.4rem; }
+.is-mobile .seq-label { font-size: 0.55rem; padding-right: 3px; letter-spacing: 0; }
+.is-mobile .seq-cell { aspect-ratio: auto; height: 26px; }
