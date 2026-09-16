@@ -740,3 +740,31 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 
 /* Phones: video tiles a touch wider */
 .is-mobile .yt, .is-mobile .yt-fig .yt, .is-mobile .pg-split .pg-right .yt { width: 96%; max-width: 96%; }
+
+/* Phones: Meditate with the Sun styled as its own section (label, big breathing sun, open layout) */
+.is-mobile .meditate-card {
+  margin-top: 11rem;
+  margin-bottom: 3rem;
+  background: transparent;
+  border: 0;
+  text-align: center;
+  overflow: visible;
+}
+.is-mobile .meditate-card::before {
+  content: 'Breathe';
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.25rem;
+}
+.is-mobile .meditate-visual {
+  height: 220px !important;
+  border: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(212, 168, 67, 0.14), rgba(6, 6, 8, 0) 62%);
+}
+.is-mobile .meditate-card .sun-breath { width: 170px; height: 170px; }
+.is-mobile .meditate-card h3 { font-size: 1.9rem; font-weight: 300; padding: 1.5rem 0 0.6rem; line-height: 1.1; }
+.is-mobile .meditate-card p { font-size: 1.02rem; line-height: 1.6; padding: 0 0.5rem 0.5rem; color: var(--text-dim); }
