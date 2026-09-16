@@ -3,7 +3,7 @@
  * Hero particle field, citizen science waveform, dome starfield, synth wave.
  */
 
-import * as audio from './audio.js?v=9';
+import * as audio from './audio.js?v=10';
 const getStemAnalyser = audio.getStemAnalyser;
 const getHeroAnalyser = audio.getHeroAnalyser;
 const getHeroSourceNode = audio.getHeroSourceNode;
