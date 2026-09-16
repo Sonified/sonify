@@ -737,3 +737,6 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 
 /* Phones: Meditate with the Sun stands apart from the instruments, with room above and below */
 .is-mobile .meditate-card { margin-top: 7rem; margin-bottom: 3rem; }
+
+/* Phones: video tiles a touch wider */
+.is-mobile .yt, .is-mobile .yt-fig .yt, .is-mobile .pg-split .pg-right .yt { width: 96%; max-width: 96%; }
