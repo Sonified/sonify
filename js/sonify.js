@@ -86,7 +86,7 @@
 
     let w = 0, h = 0, dpr = 1;
     let visible = false, raf = 0, t = 0, lastTs = 0;
-    const N = 320;
+    const N = 170;
     const particles = [];
 
     function resize() {
@@ -116,11 +116,11 @@
     function spawn(p, e, initial) {
       p.x = e.x + (initial ? Math.random() * (w - e.x) : Math.random() * 24);
       p.y = e.y0 + Math.random() * (e.y1 - e.y0);
-      p.vx = 0.9 + Math.random() * 2.4;
+      p.vx = 0.6 + Math.random() * 1.6;
       p.amp = 4 + Math.random() * 26;
       p.freq = 0.4 + Math.random() * 1.6;
       p.phase = Math.random() * Math.PI * 2;
-      p.size = 0.7 + Math.random() * 1.9;
+      p.size = 0.6 + Math.random() * 1.4;
       p.life = 0;
       p.maxLife = 220 + Math.random() * 360;
       p.warm = Math.random(); // 0 = pale gold, 1 = deep amber
@@ -165,7 +165,7 @@
         const trail = p.vx * 7;
 
         // streak
-        ctx.strokeStyle = `rgba(${r},${g},${b},${(a * 0.35).toFixed(3)})`;
+        ctx.strokeStyle = `rgba(${r},${g},${b},${(a * 0.2).toFixed(3)})`;
         ctx.lineWidth = p.size;
         ctx.beginPath();
         ctx.moveTo(p.x - trail, p.y);
@@ -173,7 +173,7 @@
         ctx.stroke();
 
         // bright head
-        ctx.fillStyle = `rgba(${Math.min(255, r + 30)},${Math.min(255, g + 40)},${b + 60},${(a * 0.9).toFixed(3)})`;
+        ctx.fillStyle = `rgba(${Math.min(255, r + 30)},${Math.min(255, g + 40)},${b + 60},${(a * 0.55).toFixed(3)})`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size * 0.9, 0, Math.PI * 2);
         ctx.fill();
@@ -181,8 +181,8 @@
 
       // soft glow bloom just off the photo edge
       const glow = ctx.createRadialGradient(e.x, (e.y0 + e.y1) / 2, 0, e.x, (e.y0 + e.y1) / 2, (e.y1 - e.y0) * 0.9);
-      glow.addColorStop(0, 'rgba(212,168,67,0.16)');
-      glow.addColorStop(0.5, 'rgba(212,168,67,0.05)');
+      glow.addColorStop(0, 'rgba(212,168,67,0.09)');
+      glow.addColorStop(0.5, 'rgba(212,168,67,0.03)');
       glow.addColorStop(1, 'rgba(212,168,67,0)');
       ctx.fillStyle = glow;
       ctx.fillRect(0, 0, w, h); // full-width so the radial falloff has no hard edge (the photo covers the left side)
@@ -199,16 +199,54 @@
     ensureParticles();
     window.addEventListener('resize', () => { resize(); });
 
-    const obs = new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting && !document.hidden;
+    // Track "section on screen" and "tab visible" separately; recompute from both
+    // so a hidden tab can wake the loop back up on return.
+    let intersecting = false;
+    function updateVisible() {
+      visible = intersecting && !document.hidden;
       if (visible) start();
+    }
+    const obs = new IntersectionObserver(([entry]) => {
+      intersecting = entry.isIntersecting;
+      updateVisible();
     }, { threshold: 0.05 });
     obs.observe(section);
-    document.addEventListener('visibilitychange', () => {
-      visible = !document.hidden && visible;
-      if (visible) start();
-    });
+    document.addEventListener('visibilitychange', updateVisible);
+    window.addEventListener('focus', updateVisible);
+    window.addEventListener('pageshow', updateVisible);
   }
 
   initSolarFlow();
+
+  // ===== 4. Hero scroll cue on load =====
+  // Sonara only reveals the chevron after a Listen click (and then ~10s later).
+  // A first-time viewer needs the "scroll down" cue without doing anything, so
+  // arm a chevron-only hint a few seconds after load. Sonara's own logic takes
+  // over from there: it dismisses the hint on scroll-away and shows the data
+  // caption once the solar wind is playing.
+  (function armHeroCue() {
+    const hero = document.querySelector('section[data-page="hero"]');
+    const hint = hero && hero.querySelector('.scroll-hint');
+    if (!hint) return;
+    const REVEAL_MS = 4000, PULSE_MS = 1200;
+    setTimeout(() => {
+      if (hint.dataset.dismissed === '1' || hint.classList.contains('visible')) return;
+      const rect = hero.getBoundingClientRect();
+      if (rect.bottom < window.innerHeight * 0.5) return; // already scrolled past
+      hint.classList.add('chevron-only', 'visible', 'show-chevron');
+      setTimeout(() => {
+        if (hint.dataset.dismissed !== '1') hint.classList.add('pulsing');
+      }, PULSE_MS);
+    }, REVEAL_MS);
+  })();
+
+  // ===== 3. Jump links: data-jump="<data-page>" scrolls to that page wherever it sits in PAGE_ORDER =====
+  document.querySelectorAll('[data-jump]').forEach(link => {
+    link.addEventListener('click', e => {
+      const target = document.querySelector(`section[data-page="${link.dataset.jump}"]`);
+      if (!target) return; // page not in PAGE_ORDER: let the href fallback do its thing
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
 })();
