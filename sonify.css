@@ -684,3 +684,7 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 .is-mobile .scroll-hint { display: flex !important; }
 .is-mobile .scroll-hint .section-down-chevron { display: none !important; }
 .is-mobile .scroll-hint-text { font-size: 0.72rem; }
+
+/* Phone: extra breathing room around the Listen to Space page */
+.is-mobile #education { padding-top: 9rem; padding-bottom: 7.5rem; }
+.is-mobile #education .pg-content { gap: 1.75rem; }
