@@ -734,3 +734,6 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 .is-mobile .section::before, .is-mobile .section::after { display: none !important; }
 /* Phones: Connect link last on the golden hour page */
 .is-mobile #citizen-science .ghost-link { order: 6; }
+
+/* Phones: Meditate with the Sun stands apart from the instruments, with room above and below */
+.is-mobile .meditate-card { margin-top: 7rem; margin-bottom: 3rem; }
