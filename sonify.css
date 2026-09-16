@@ -664,7 +664,13 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 .is-mobile #citizen-science .pg-body, .is-mobile #citizen-science .pg-right .pg-caption { display: none !important; }
 
 /* ----- Mobile pass 3: Play the Sun ----- */
-.is-mobile .seq-toolbar { justify-content: flex-start; }
+.is-mobile .seq-toolbar {
+  justify-content: flex-start;
+  padding-left: 0;
+  margin-bottom: 0;
+  position: relative;
+  z-index: 2;
+}
 /* Grid fits inside the card border: no forced width, tighter gap and padding */
 .is-mobile .sequencer-visual { overflow: hidden; }
 .is-mobile .seq-grid { min-width: 0; gap: 2px; padding: 0.5rem 0.6rem 0.4rem; }
