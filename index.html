@@ -29,7 +29,7 @@
     })();
   </script>
   <link rel="stylesheet" href="styles.css?v=1">
-  <link rel="stylesheet" href="sonify.css?v=10">
+  <link rel="stylesheet" href="sonify.css?v=11">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -37,6 +37,8 @@
 </head>
 <body>
   <div id="cursor-glow"></div>
+  <!-- Rising starfield: fixed layer behind every page after the hero (drawn by initEduCanvas) -->
+  <canvas id="edu-canvas" aria-hidden="true"></canvas>
 
   <!--
     ============================================================
@@ -88,7 +90,6 @@
 
   <!-- ===== PAGE: nasa-video (starfield background) ===== -->
   <section id="education" class="section page-video" data-page="nasa-video" data-nav="Listen to Space">
-    <canvas id="edu-canvas"></canvas>
     <div class="pg-content">
       <div class="pg-head">
         <div class="section-label">Listen to Space</div>
@@ -163,7 +164,6 @@
 
   <!-- ===== PAGE: synth (spectrum background, Sonara instruments) ===== -->
   <section id="stem-music" class="section" data-page="synth" data-nav="Play the Sun" data-sound="stem-music">
-    <canvas id="spectrum-canvas"></canvas>
     <div class="music-bg"></div>
     <div class="music-content">
       <div class="music-header">
@@ -305,8 +305,8 @@
   <script src="js/pages.js?v=2"></script>
   <script src="js/rays.js?v=9"></script>
   <script type="module" src="js/audio.js?v=10"></script>
-  <script type="module" src="js/visuals.js?v=30"></script>
-  <script type="module" src="js/main.js?v=35"></script>
+  <script type="module" src="js/visuals.js?v=31"></script>
+  <script type="module" src="js/main.js?v=36"></script>
   <script type="module" src="js/sonify.js?v=2"></script>
 </body>
 </html>

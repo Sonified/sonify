@@ -6240,7 +6240,17 @@ function initEduCanvas() {
   const c = canvas.getContext('2d');
   let w, h;
   let time = 5 + Math.random() * 10;
-  const vis = trackVisibility('education');
+  // Global layer: draw whenever any page after the hero is on screen.
+  const vis = { visible: false, _set: new Map() };
+  {
+    const update = () => { vis.visible = !document.hidden && Array.from(vis._set.values()).some(Boolean); };
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(en => vis._set.set(en.target, en.isIntersecting));
+      update();
+    }, { threshold: 0 });
+    document.querySelectorAll('section[data-page]:not([data-page="hero"])').forEach(sec => obs.observe(sec));
+    document.addEventListener('visibilitychange', update);
+  }
   const STARS = 300;
   let stars = [];
   const AUTO_EMITTER_SPEED = 0.33; // ~1/3 of click-spawn particle rise speed
@@ -6325,12 +6335,6 @@ function initEduCanvas() {
     c.fillStyle = grad;
     c.fillRect(0, 0, w, h);
 
-    // Dome ring
-    c.strokeStyle = 'rgba(74, 143, 212, 0.06)';
-    c.lineWidth = 1;
-    c.beginPath();
-    c.arc(w / 2, h / 2, Math.min(w, h) * 0.38, 0, Math.PI * 2);
-    c.stroke();
 
     // Stars
     for (let i = stars.length - 1; i >= 0; i--) {
@@ -6388,9 +6392,10 @@ function initEduCanvas() {
 
   // Click + drag to add stars
   let domeDragging = false;
-  const domeEl = document.getElementById('education');
+  const domeEl = document.getElementById('pages') || document.getElementById('education');
 
   function spawnStars(e) {
+    if (e.target && e.target.closest && e.target.closest('#hero')) return; // hero has its own burst interaction
     const rect = canvas.getBoundingClientRect();
     const scaleX = w / rect.width, scaleY = h / rect.height;
     const cx = (e.clientX - rect.left) * scaleX;
@@ -6399,8 +6404,8 @@ function initEduCanvas() {
     spawnStarsAt(cx, cy, { count, spread: 40, speedMul: 1 });
   }
 
-  domeEl.addEventListener('mousedown', (e) => { domeDragging = true; spawnStars(e); });
-  domeEl.addEventListener('mousemove', (e) => { if (domeDragging) spawnStars(e); });
+  if (domeEl) domeEl.addEventListener('mousedown', (e) => { domeDragging = true; spawnStars(e); });
+  if (domeEl) domeEl.addEventListener('mousemove', (e) => { if (domeDragging) spawnStars(e); });
   window.addEventListener('mouseup', () => { domeDragging = false; });
 
   window.addEventListener('resize', resize);
