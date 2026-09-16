@@ -643,3 +643,22 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 .is-mobile .wwr-body { font-size: 1.05rem; }
 .is-mobile .wwr-cta { flex-direction: column; align-items: flex-start; gap: 0.9rem; }
 .is-mobile .wwr-btn { width: 100%; text-align: center; }
+
+/* ----- Mobile pass 2 ----- */
+/* More room under the top fade so labels never sit in it */
+.is-mobile .section { padding-top: 6.5rem; padding-bottom: 5rem; }
+.is-mobile .section::before, .is-mobile .section::after { height: 6vh; }
+.is-mobile #hero { padding-top: 0; padding-bottom: 0; }
+
+/* Page 3 on phones: label, heading, sub-heading, the two videos. Nothing else. */
+.is-mobile #vision .yt-fig figcaption, .is-mobile #vision .ghost-link { display: none !important; }
+
+/* Golden hour on phones: label, title, video, stats, then the two cards. */
+.is-mobile #citizen-science .pg-split { display: flex; flex-direction: column; gap: 1.25rem; }
+.is-mobile #citizen-science .pg-left, .is-mobile #citizen-science .pg-right { display: contents; }
+.is-mobile #citizen-science .section-label { order: 1; margin-bottom: 0; }
+.is-mobile #citizen-science .pg-title { order: 2; margin-bottom: 0; }
+.is-mobile #citizen-science .pg-right .yt { order: 3; }
+.is-mobile #citizen-science .pg-stats { order: 4; margin-top: 0.25rem; }
+.is-mobile #citizen-science .pg-cards { order: 5; margin-top: 0; }
+.is-mobile #citizen-science .pg-body, .is-mobile #citizen-science .pg-right .pg-caption { display: none !important; }
