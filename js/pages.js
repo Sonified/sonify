@@ -26,6 +26,12 @@ window.SONIFY = {
     'work-with-robert',  // Headshot, logos, contact
   ],
 
+  // Phone-only switches (desktop ignores these)
+  MOBILE: {
+    blobs: false,        // nebula blobs behind "Step inside the data"
+    starEmitter: false,  // the slow wandering emitter that adds stars to the starfield
+  },
+
   LINKS: {
     // Public share link to the Solar Sample Pack zip (Dropbox / Drive / GitHub release)
     samplePack: 'https://data.now.audio/samples/Solar_Sample_Pack_I.zip',
@@ -81,6 +87,11 @@ window.SONIFY = {
     s.classList.toggle('is-last', i === finalPages.length - 1);
   });
   console.log('[pages] order:', finalPages.map(s => s.dataset.page).join(' → '));
+
+  // ----- 1b. Phone switches (runs before visuals.js, so removed canvases never initialize) -----
+  if (document.documentElement.classList.contains('is-mobile') && cfg.MOBILE) {
+    if (!cfg.MOBILE.blobs) document.getElementById('vision-canvas')?.remove();
+  }
 
   // ----- 2. Links -----
   document.querySelectorAll('[data-link]').forEach(el => {

@@ -729,3 +729,8 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 
 /* Phones: no fade bands between pages, so the starfield runs continuously */
 .is-mobile .section::before, .is-mobile .section::after { display: none !important; }
+
+/* Phones: no fade bands between pages, so the starfield runs continuously */
+.is-mobile .section::before, .is-mobile .section::after { display: none !important; }
+/* Phones: Connect link last on the golden hour page */
+.is-mobile #citizen-science .ghost-link { order: 6; }

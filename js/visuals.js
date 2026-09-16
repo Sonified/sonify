@@ -6240,6 +6240,8 @@ function initEduCanvas() {
   const c = canvas.getContext('2d');
   let w, h;
   let time = 5 + Math.random() * 10;
+  // Phones can switch the wandering emitter off via SONIFY.MOBILE.starEmitter (js/pages.js).
+  const autoEmitterOn = !(document.documentElement.classList.contains('is-mobile') && window.SONIFY?.MOBILE?.starEmitter === false);
   // Global layer: draw whenever any page after the hero is on screen.
   const vis = { visible: false, _set: new Map() };
   {
@@ -6366,6 +6368,7 @@ function initEduCanvas() {
       }
     }
 
+    if (autoEmitterOn) {
     // Autonomous emitter: layered sinusoids in X/Y create a complex meandering signal path.
     const ex =
       w * 0.5 +
@@ -6387,6 +6390,7 @@ function initEduCanvas() {
       const spawnCount = Math.random() < 0.08 ? 2 : 1;
       spawnStarsAt(emitX, emitY, { count: spawnCount, spread: 24, speedMul: AUTO_EMITTER_SPEED, auto: true });
     }
+    } // autoEmitterOn
 
   }
 
