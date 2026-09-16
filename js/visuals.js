@@ -1128,7 +1128,7 @@ function initHeroCanvas() {
   }
 
   const rippleRadiusOverlay = document.createElement('div');
-  rippleRadiusOverlay.style.cssText = 'position:absolute;left:0;top:0;border:1px solid rgba(228,188,88,0.75);border-radius:50%;pointer-events:none;box-shadow:0 0 0 1px rgba(0,0,0,0.2),0 0 18px rgba(228,188,88,0.18);opacity:0;display:none;transform:translate(-50%,-50%);z-index:3';
+  rippleRadiusOverlay.style.cssText = 'position:absolute;left:0;top:0;border:1px solid rgba(228,188,88,0.75);border-radius:50%;pointer-events:none;box-shadow:0 0 0 1px rgba(0,0,0,0.2),0 0 18px rgba(228,188,88,0.18);opacity:0;display:none;transform:translate(-50%,-50%);z-index:0'; // z 0: above the canvas, below .hero-inner text (z 1)
   if (canvas.parentElement) {
     const parentStyle = window.getComputedStyle(canvas.parentElement);
     if (parentStyle.position === 'static') {
