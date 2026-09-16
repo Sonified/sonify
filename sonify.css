@@ -1,0 +1,416 @@
+/* ============================================================
+   SONIFY overrides & new pages
+   styles.css is a verbatim copy of Sonara's stylesheet so it can be
+   re-synced. Everything site-specific lives here.
+   ============================================================ */
+
+/* ----- Hero: longer title than "SONARA" ----- */
+.hero-title {
+  font-size: clamp(2.4rem, 6.5vw, 6.2rem);
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+}
+.hero-expansion-lead { font-weight: 700; }
+.hero-tagline { width: min(520px, 88vw); }
+
+/* Last page in the configured order never shows the bottom fade. */
+.section.is-last::after { display: none; }
+
+/* ----- Shared page content wrapper (fade-up on reveal, like Sonara) ----- */
+.pg-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1240px;
+  padding: 0 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.4rem;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+.section.in-view .pg-content { opacity: 1; transform: translateY(0); }
+
+.pg-head { text-align: center; max-width: 780px; }
+.pg-head .section-label { margin-bottom: 1rem; }
+
+.pg-title {
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
+  font-weight: 300;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.9rem;
+}
+.pg-title em { font-style: normal; color: var(--accent); }
+.pg-title-lg { font-size: clamp(2.4rem, 4.4vw, 3.8rem); }
+
+.pg-body {
+  font-size: clamp(0.95rem, 1.15vw, 1.08rem);
+  line-height: 1.65;
+  color: var(--text-dim);
+}
+.pg-body em { color: var(--text); font-style: italic; }
+
+.pg-caption {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  opacity: 0.75;
+  text-align: center;
+}
+.pg-caption a { color: var(--accent); }
+
+/* ----- YouTube facade ----- */
+.yt {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000;
+  cursor: pointer;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  transition: box-shadow 0.35s ease, transform 0.35s ease;
+}
+.yt:hover { box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(212, 168, 67, 0.45), 0 0 40px rgba(212, 168, 67, 0.12); }
+.yt img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0.82;
+  transition: opacity 0.35s ease, transform 0.6s ease;
+}
+.yt:hover img { opacity: 0.95; transform: scale(1.02); }
+.yt-play {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  border: 1px solid rgba(212, 168, 67, 0.55);
+  background: rgba(6, 6, 8, 0.55);
+  color: var(--accent);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding-left: 6px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 0 0 0 rgba(212, 168, 67, 0.35);
+  transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.6s ease;
+}
+.yt:hover .yt-play { transform: scale(1.08); background: rgba(212, 168, 67, 0.16); box-shadow: 0 0 0 14px rgba(212, 168, 67, 0.08); }
+.yt-label {
+  position: absolute;
+  left: 1.1rem;
+  bottom: 0.95rem;
+  right: 1.1rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: rgba(232, 230, 227, 0.85);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.yt iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.yt.yt-active img,
+.yt.yt-active .yt-play,
+.yt.yt-active .yt-label { display: none; }
+.yt.yt-active { cursor: default; }
+
+/* Single wide video: never taller than the viewport allows */
+.yt-wide { max-width: min(1040px, calc((100vh - 400px) * 1.7778)); }
+
+/* Two videos side by side */
+.yt-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.25rem;
+  width: 100%;
+  max-width: 1200px;
+}
+.yt-fig { margin: 0; display: flex; flex-direction: column; gap: 0.9rem; }
+.yt-fig .yt { max-width: calc((100vh - 420px) * 1.7778); margin: 0 auto; }
+.yt-fig figcaption { display: flex; flex-direction: column; gap: 0.25rem; text-align: center; }
+.yt-fig figcaption strong { font-weight: 500; font-size: 1.05rem; }
+.yt-fig figcaption span {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+/* ----- Pop page: split layout ----- */
+.pg-split {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 3.5rem;
+  align-items: center;
+  max-width: 1320px;
+}
+.pg-split .pg-left { display: flex; flex-direction: column; }
+.pg-split .pg-left .section-label { margin-bottom: 0.9rem; }
+.pg-split .pg-body { max-width: 560px; }
+.pg-split .pg-right { display: flex; flex-direction: column; gap: 0.9rem; }
+.pg-split .pg-right .yt { max-width: calc((100vh - 260px) * 1.7778); }
+
+.pg-stats { display: flex; gap: 2.5rem; margin-top: 1.5rem; }
+.pg-stat { display: flex; flex-direction: column; }
+.pg-stat-n {
+  font-size: 2rem;
+  font-weight: 300;
+  color: var(--accent);
+  line-height: 1;
+}
+.pg-stat-l {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 0.4rem;
+}
+
+.pg-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1.75rem;
+}
+.pg-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1.1rem 1.25rem;
+  border-radius: 12px;
+  background: rgba(18, 18, 26, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.3s ease, transform 0.3s ease, background 0.3s ease, opacity 0.3s;
+}
+.pg-card:hover { opacity: 1; border-color: rgba(212, 168, 67, 0.45); background: rgba(22, 22, 32, 0.85); transform: translateY(-2px); }
+.pg-card strong { font-size: 1.15rem; font-weight: 500; }
+.pg-card-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.pg-card-text { font-size: 0.88rem; line-height: 1.5; color: var(--text-dim); }
+.pg-pending-note {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--coral);
+  margin-top: 0.2rem;
+}
+.pg-card.is-pending .pg-pending-note { display: block; }
+.pg-card.is-pending { cursor: default; }
+
+/* Logo slots: <img> first; if it fails to load the wordmark sibling shows. */
+.logo-slot { display: flex; align-items: center; min-height: 2rem; }
+.logo-slot img { max-height: 2rem; max-width: 180px; object-fit: contain; display: block; }
+.wordmark {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(232, 230, 227, 0.85);
+  white-space: nowrap;
+}
+.wordmark-serif { font-family: Georgia, 'Times New Roman', serif; letter-spacing: 0.08em; font-size: 0.8rem; }
+.wordmark-rs {
+  font-family: 'Times New Roman', Georgia, serif;
+  font-weight: 700;
+  font-style: italic;
+  font-size: 1.65rem;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  color: #fff;
+}
+
+/* ----- Synth page tweaks ----- */
+#stem-music .music-subtitle { max-width: 640px; margin: 0 auto; }
+.music-credit { margin-top: -0.75rem; }
+
+/* ----- Work with Robert ----- */
+#solar-flow-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+.wwr-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1320px;
+  padding: 0 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+.section.in-view .wwr-content { opacity: 1; transform: translateY(0); }
+
+.wwr-top {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3.5rem;
+  align-items: center;
+}
+.wwr-photo {
+  height: min(56vh, 560px);
+  aspect-ratio: 2 / 3;
+  border-radius: 18px;
+  overflow: hidden;
+  position: relative;
+  box-shadow:
+    0 0 0 1px rgba(212, 168, 67, 0.35),
+    14px 0 70px rgba(212, 168, 67, 0.22),
+    0 30px 80px rgba(0, 0, 0, 0.65);
+}
+.wwr-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 20%;
+  display: block;
+}
+.wwr-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, transparent 70%, rgba(212, 168, 67, 0.14));
+  pointer-events: none;
+}
+
+.wwr-right { display: flex; flex-direction: column; }
+.wwr-right .section-label { margin-bottom: 0.9rem; }
+.wwr-title {
+  font-size: clamp(2.4rem, 4.5vw, 3.8rem);
+  font-weight: 300;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+.wwr-sub {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin-top: 0.7rem;
+}
+
+.wwr-logos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.9rem;
+}
+.wwr-logo {
+  height: 66px;
+  min-width: 100px;
+  padding: 0.6rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 15, 20, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+.wwr-logo:hover { border-color: rgba(212, 168, 67, 0.4); background: rgba(20, 20, 28, 0.9); }
+.wwr-logo img {
+  max-height: 44px;
+  max-width: 130px;
+  object-fit: contain;
+  display: block;
+  filter: grayscale(1) brightness(1.55) contrast(0.92);
+  opacity: 0.82;
+  transition: filter 0.35s ease, opacity 0.35s ease;
+}
+.wwr-logo:hover img { filter: none; opacity: 1; }
+
+.wwr-bottom { display: flex; flex-direction: column; gap: 1.25rem; max-width: 900px; }
+.wwr-body {
+  font-size: clamp(1.05rem, 1.45vw, 1.3rem);
+  line-height: 1.7;
+  color: rgba(226, 216, 188, 0.94);
+}
+.wwr-cta { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+.wwr-btn { font-size: 0.9rem; padding: 0.95rem 2.6rem; pointer-events: auto; }
+.wwr-email {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+.wwr-email:hover { color: var(--accent); opacity: 1; }
+
+.form-embed { width: 100%; max-width: 760px; }
+.form-embed iframe {
+  width: 100%;
+  height: min(60vh, 640px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.wwr-footer {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  opacity: 0.3;
+  text-align: left;
+}
+
+/* ----- Narrow screens (site is desktop-first; keep it sane when squeezed) ----- */
+@media (max-width: 1000px) {
+  .pg-content, .wwr-content { padding: 0 1.5rem; }
+  .yt-pair, .pg-split, .pg-cards { grid-template-columns: 1fr; }
+  .wwr-top { grid-template-columns: 1fr; gap: 1.5rem; }
+  .wwr-photo { height: 38vh; }
+  .hero-title { white-space: normal; }
+}
+
+/* Logo variants: dark artwork on transparent → invert; artwork on a white box → invert + screen (box disappears) */
+.wwr-logo img.logo-dark { filter: invert(1) grayscale(1) brightness(1.05); }
+.wwr-logo:hover img.logo-dark { filter: invert(1); }
+.wwr-logo img.logo-onwhite { filter: invert(1) grayscale(1) brightness(1.05); mix-blend-mode: screen; }
+.wwr-logo:hover img.logo-onwhite { filter: invert(1) hue-rotate(180deg); }
+
+/* The hidden attribute must win over any display rule (logo fallbacks rely on it). */
+[hidden] { display: none !important; }
+
+/* Bigger, less blown-out treatment for detailed seals */
+.wwr-logo img.logo-seal { max-height: 54px; filter: grayscale(1) brightness(1.25) contrast(1.05); }
+.wwr-logo img.logo-onwhite { max-height: 54px; }
+
+/* Data-source list on the synth page: 5 rows must fit the height-matched visual */
+#stem-music .catalog-rows { gap: 0.25rem; padding: 0.6rem 1.25rem; justify-content: center; height: 100%; }
+#stem-music .catalog-row { padding: 0.28rem 0; }
+
+/* Shimmer layer mirrors the title text from data-text (Sonara hardcodes 'SONARA'). */
+.hero-title .glow-wrap::after { content: attr(data-text); }

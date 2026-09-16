@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <title>Sound Science | Listen to the sounds of the cosmos</title>
+  <meta name="description" content="NASA satellite data transformed into sound. Hear the solar wind, play the magnetosphere, and explore the work of Dr. Robert Alexander.">
+  <meta property="og:title" content="Sound Science">
+  <meta property="og:description" content="Listen to the sounds of the cosmos.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://sonify.now.audio/">
+  <meta property="og:image" content="https://sonify.now.audio/images/robert-cannes.jpg">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☀️</text></svg>">
+  <script>
+    // Detect mobile once at load — never re-evaluate on resize
+    (function(){
+      function checkMobile() {
+        var w = window.innerWidth, touch = 'ontouchstart' in window,
+            coarse = matchMedia('(pointer:coarse)').matches,
+            portrait = w < window.innerHeight;
+        if (w <= 768 && (touch || coarse || portrait))
+          document.documentElement.classList.add('is-mobile');
+        else
+          document.documentElement.classList.remove('is-mobile');
+      }
+      checkMobile();
+      window.addEventListener('resize', checkMobile);
+    })();
+  </script>
+  <link rel="stylesheet" href="styles.css?v=1">
+  <link rel="stylesheet" href="sonify.css?v=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script>document.fonts.ready.then(() => document.body.classList.add('fonts-ready'));</script>
+</head>
+<body>
+  <div id="cursor-glow"></div>
+
+  <!--
+    ============================================================
+    PAGES
+    Each <section data-page="..."> is one full-screen page.
+    The ORDER of pages is controlled by PAGE_ORDER in js/pages.js,
+    not by the order below. Pages missing from PAGE_ORDER are removed.
+
+    The `id` on each section selects a background engine inherited
+    from Sonara (hero-canvas, edu-canvas starfield, vision-canvas
+    nebula, cs-canvas waveform, spectrum-canvas, contact). Keep the
+    id; rename the page via data-page. data-nav is the dot-nav tooltip.
+    The hero title's data-text feeds the CSS shimmer layer; rays.js reads
+    the span text, so change the title in one place (the span).
+    ============================================================
+  -->
+  <main id="pages">
+
+  <!-- ===== PAGE: hero ===== -->
+  <section id="hero" class="section" data-page="hero" data-nav="Sound Science" data-sound="hero">
+    <canvas id="hero-canvas"></canvas>
+    <!-- Mobile overlay (shown only on mobile via CSS) -->
+    <div id="mobile-overlay">
+      <div class="mobile-overlay-content">
+        <p class="mobile-overlay-text">This experience is designed<br>for large screens</p>
+      </div>
+    </div>
+    <div class="hero-inner">
+      <div id="audio-toast" style="opacity:0;transition:opacity 0.4s;pointer-events:none;text-align:center;color:#f4a261;font-size:0.85rem;letter-spacing:0.04em;margin-bottom:0.5rem;min-height:1.2em;"></div>
+      <h1 class="hero-title"><span class="glow-wrap" data-text="SOUND SCIENCE">SOUND SCIENCE</span><canvas id="rays-canvas"></canvas></h1>
+      <p class="hero-expansion"><span class="hero-expansion-lead">Listen to the sounds of the cosmos</span></p>
+      <p class="hero-tagline"><span class="hero-tagline-line">NASA satellite data,</span><br><span class="hero-tagline-line">transformed into sound.</span></p>
+      <div class="hero-audio-meta">
+        <button class="listen-btn sound-trigger" aria-label="Listen to the solar wind">
+          <span class="listen-ring"></span>
+          <span class="listen-ring ring-2"></span>
+          <span class="listen-icon">
+            <svg width="18" height="20" viewBox="0 0 18 20" fill="none"><path d="M2 3.5L16 10L2 16.5V3.5Z" fill="currentColor"/></svg>
+          </span>
+          <span class="listen-text">Listen to the solar wind</span>
+        </button>
+      </div>
+    </div>
+    <div class="scroll-hint">
+      <span class="scroll-hint-text">OMNI Helium Velocity Data</span>
+      <span class="section-down-chevron">⌄</span>
+    </div>
+  </section>
+
+  <!-- ===== PAGE: nasa-video (starfield background) ===== -->
+  <section id="education" class="section page-video" data-page="nasa-video" data-nav="Listen to Space">
+    <canvas id="edu-canvas"></canvas>
+    <div class="pg-content">
+      <div class="pg-head">
+        <div class="section-label">Listen to Space</div>
+        <h2 class="pg-title">NASA data, <em>transformed into sound</em></h2>
+        <p class="pg-body">Measurements from the Parker Solar Probe, MMS, and Wind spacecraft, turned into audio with NASA's CDAWeb. Hear a coronal mass ejection, a proton cyclotron wave storm, and the dawn chorus of Earth's magnetosphere.</p>
+      </div>
+      <div class="yt yt-wide" data-yt="j9A2MTB9gl0" data-title="Listen To SPACE! Transforming Heliophysics Data into Sound"></div>
+      <p class="pg-caption">NASA Video &middot; Data audification &amp; video production by Robert Alexander</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE: audio-production (nebula background) ===== -->
+  <section id="vision" class="section page-video" data-page="audio-production" data-nav="Sound as Story">
+    <canvas id="vision-canvas"></canvas>
+    <div class="vision-bg"></div>
+    <div class="pg-content">
+      <div class="pg-head">
+        <div class="section-label">Data infused into audio production</div>
+        <h2 class="pg-title">Sound as <em>story</em></h2>
+        <p class="pg-body">Space physics doesn't just become audible. It becomes narration, soundtrack, and immersive experience.</p>
+      </div>
+      <div class="yt-pair">
+        <figure class="yt-fig">
+          <div class="yt" data-yt="0vOL60ym0iw" data-title="Listen to space! Heliophysics Audified: Resonances in Plasmas (HARP)"></div>
+          <figcaption><strong>HARP: Heliophysics Audified</strong><span>Narration &amp; original soundtrack &middot; NASA citizen science with UCLA</span></figcaption>
+        </figure>
+        <figure class="yt-fig">
+          <div class="yt" data-yt="9A8b9cWIX2I" data-title="The Edgar Mitchell Overview Effect VR Experience"></div>
+          <!-- TODO: confirm Robert's credit line for this one -->
+          <figcaption><strong>The Edgar Mitchell Overview Effect</strong><span>VR experience &middot; Immersive VR Education</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE: pop (waveform background) ===== -->
+  <section id="citizen-science" class="section" data-page="pop" data-nav="golden hour ft. The Sun">
+    <canvas id="cs-canvas"></canvas>
+    <div class="pg-content pg-split">
+      <div class="pg-left">
+        <div class="section-label">Pop Production</div>
+        <h2 class="pg-title pg-title-lg">golden hour<br><em>ft. The Sun</em></h2>
+        <p class="pg-body">Robert audified NASA satellite recordings of the Sun's magnetic field. JVKE heard those sounds and built a new version of his hit <em>golden hour</em> around them for Magnum at the 2023 Cannes Film Festival.</p>
+        <div class="pg-stats">
+          <div class="pg-stat"><span class="pg-stat-n">100M+</span><span class="pg-stat-l">streams</span></div>
+          <div class="pg-stat"><span class="pg-stat-n">113</span><span class="pg-stat-l">countries reached</span></div>
+        </div>
+        <div class="pg-cards">
+          <a class="pg-card" data-link="samplePack" href="#" target="_blank" rel="noopener">
+            <span class="pg-card-kicker">Free download</span>
+            <strong>Solar Sample Pack</strong>
+            <span class="pg-card-text">Kicks, snares, whooshes, and drones made from real spacecraft data. Download it and explore.</span>
+            <span class="pg-pending-note">Download link coming soon</span>
+          </a>
+          <a class="pg-card pg-card-press" data-link="rollingStone" href="#" target="_blank" rel="noopener">
+            <span class="pg-card-kicker">As featured in</span>
+            <span class="logo-slot logo-slot-rs">
+              <img src="logos/rolling-stone.svg" alt="Rolling Stone" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+              <span class="wordmark wordmark-rs" hidden>Rolling Stone</span>
+            </span>
+            <span class="pg-card-text">&ldquo;TikTok star JVKE announces new version of golden hour featuring sounds from NASA library&rdquo;</span>
+          </a>
+        </div>
+      </div>
+      <div class="pg-right">
+        <div class="yt" data-yt="PLkRJA_7_Lo" data-title="JVKE - golden hour (ft. The Sun) [Sunlover-Starchaser Edit]"></div>
+        <p class="pg-caption">Magnum &middot; JVKE &middot; Solar sounds by Robert Alexander</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE: synth (spectrum background, Sonara instruments) ===== -->
+  <section id="stem-music" class="section" data-page="synth" data-nav="Play the Sun" data-sound="stem-music">
+    <canvas id="spectrum-canvas"></canvas>
+    <div class="music-bg"></div>
+    <div class="music-content">
+      <div class="music-header">
+        <div class="section-label">Interactive</div>
+        <h2 class="music-title">Play the Sun</h2>
+        <p class="music-subtitle">Instruments built from real NASA satellite data. Press play, then click the grid.</p>
+      </div>
+      <div class="seq-toolbar">
+        <button class="seq-play" id="seq-play"><span style="vertical-align: 2px;">&#9654;</span> Play</button>
+        <button class="seq-loop" id="seq-loop"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px;"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg> Loop</button>
+        <button class="seq-randomize" id="seq-randomize">Randomize</button>
+      </div>
+      <div class="instruments-grid">
+        <div class="instrument-card">
+          <div class="instrument-visual sequencer-visual">
+            <div class="seq-grid" id="seq-grid"></div>
+          </div>
+          <h3><span class="contact-accent-word" style="color: var(--accent);">Solar</span> Sequencer</h3>
+          <p>A rhythmic pattern generator using audified satellite data as source material. Click cells to change the beat.</p>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-visual synth-visual">
+            <div class="synth-wt-label">
+              <span class="wt-prefix">Wavetable:</span>
+              <div class="wt-select" id="wt-select">
+                <button class="wt-current" id="wt-current" type="button">—</button>
+                <div class="wt-list" id="wt-list"></div>
+              </div>
+            </div>
+            <div class="synth-fx-btns">
+              <button class="synth-fx-btn" id="synth-delay">Delay</button>
+              <button class="synth-fx-btn" id="synth-reverb">Reverb</button>
+            </div>
+            <canvas id="synth-wave-canvas"></canvas>
+          </div>
+          <h3><span class="contact-accent-word" style="color: var(--accent);">Solar</span> Synth</h3>
+          <p>A wavetable synthesizer that loads audified satellite data as oscillator sources. Play the magnetosphere.</p>
+        </div>
+        <div class="instrument-card">
+          <div class="instrument-visual catalog-visual">
+            <div class="catalog-rows">
+              <div class="catalog-row"><span class="cat-dot"></span><span>Kick &middot; WIND magnetic field, Aug 2007</span></div>
+              <div class="catalog-row"><span class="cat-dot"></span><span>Hat &middot; Solar shaker</span></div>
+              <div class="catalog-row"><span class="cat-dot"></span><span>Wave &middot; THEMIS magnetosphere</span></div>
+              <div class="catalog-row"><span class="cat-dot"></span><span>Wave &middot; MMS dawn chorus</span></div>
+              <div class="catalog-row"><span class="cat-dot"></span><span>Wave &middot; WIND proton beam</span></div>
+            </div>
+          </div>
+          <h3>What am I hearing?</h3>
+          <p>Every sound on this page started as a spacecraft measurement. No synthesizer presets, just the Sun and Earth's magnetic field.</p>
+        </div>
+      </div>
+      <p class="pg-caption music-credit">Instruments from the <a href="https://sonara.now.audio/" target="_blank" rel="noopener">SONARA</a> project</p>
+    </div>
+  </section>
+
+  <!-- ===== PAGE: work-with-robert (solar flow background) ===== -->
+  <section id="contact" class="section" data-page="work-with-robert" data-nav="Work with Robert">
+    <canvas id="solar-flow-canvas"></canvas>
+    <div class="wwr-content">
+      <div class="wwr-top">
+        <div class="wwr-photo">
+          <img src="images/robert-cannes.jpg" alt="Dr. Robert Alexander at the Cannes Film Festival, 2023">
+        </div>
+        <div class="wwr-right">
+          <div class="section-label">Work with Robert</div>
+          <h2 class="wwr-title">Dr. Robert Alexander</h2>
+          <p class="wwr-sub">NASA Fellow &middot; Ph.D. Design Science &middot; Sound artist &amp; producer</p>
+          <div class="wwr-logos" aria-label="Organizations Robert has worked with">
+            <div class="wwr-logo" title="NASA">
+              <img src="logos/nasa.svg" alt="NASA" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+              <span class="wordmark" hidden>NASA</span>
+            </div>
+            <div class="wwr-logo" title="Festival de Cannes">
+              <img src="logos/cannes.svg" alt="Festival de Cannes" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+              <span class="wordmark wordmark-serif" hidden>Festival de Cannes</span>
+            </div>
+            <div class="wwr-logo" title="UC San Diego">
+              <img class="logo-seal" src="logos/ucsd.png" alt="UC San Diego" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+              <span class="wordmark" hidden>UC San Diego</span>
+            </div>
+            <div class="wwr-logo" title="Arthur C. Clarke Center for Human Imagination">
+              <img class="logo-dark" src="logos/clarke-center.png" alt="Arthur C. Clarke Center for Human Imagination" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+              <span class="wordmark" hidden>Clarke Center</span>
+            </div>
+            <div class="wwr-logo" title="Space Science Institute">
+              <img class="logo-onwhite" src="logos/space-science-institute.png" alt="Space Science Institute" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+              <span class="wordmark" hidden>Space Science Institute</span>
+            </div>
+            <div class="wwr-logo" title="University of Michigan">
+              <img src="logos/university-of-michigan.png" alt="University of Michigan" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+              <span class="wordmark" hidden>University of Michigan</span>
+            </div>
+            <div class="wwr-logo" title="Breathscape">
+              <img src="logos/breathscape.jpg" alt="Breathscape" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+              <span class="wordmark" hidden>Breathscape</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="wwr-bottom">
+        <!-- TODO (Robert): fill in the blanks in this sentence -->
+        <p class="wwr-body">Robert works with individuals and organizations looking to explore sound in new ways. From one-on-one mentorship to full-scale productions.</p>
+        <div class="wwr-cta">
+          <a class="contact-btn wwr-btn" data-link="googleForm" href="mailto:robert@auralab.io" target="_blank" rel="noopener">Start a conversation</a>
+          <a class="wwr-email" href="mailto:robert@auralab.io">robert@auralab.io</a>
+        </div>
+        <!-- Optional inline Google Form. Filled automatically by js/pages.js when LINKS.googleFormEmbed is set. -->
+        <div id="form-embed" class="form-embed" hidden></div>
+      </div>
+      <div class="wwr-footer">
+        <span>Sound Science</span> &middot; <span>Robert Alexander</span> &middot; <span>&copy; 2026</span>
+      </div>
+    </div>
+  </section>
+
+  </main>
+
+  <!-- Page order + links. Classic script: runs before the modules below, so
+       the DOM is in its final order before visuals/audio initialize. -->
+  <script src="js/pages.js?v=1"></script>
+  <script src="js/rays.js?v=9"></script>
+  <script type="module" src="js/audio.js?v=9"></script>
+  <script type="module" src="js/visuals.js?v=28"></script>
+  <script type="module" src="js/main.js?v=33"></script>
+  <script type="module" src="js/sonify.js?v=1"></script>
+</body>
+</html>
