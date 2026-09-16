@@ -319,6 +319,7 @@
 .wwr-sub {
   font-family: var(--font-mono);
   font-size: 0.85rem;
+  line-height: 1.75;
   letter-spacing: 0.08em;
   color: var(--text-dim);
   margin-top: 0.7rem;
