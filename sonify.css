@@ -726,3 +726,6 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 .page-qr { background: transparent; }
 /* Phones: Connect link back under the Edgar Mitchell video */
 .is-mobile #vision .ghost-link { display: inline-flex !important; }
+
+/* Phones: no fade bands between pages, so the starfield runs continuously */
+.is-mobile .section::before, .is-mobile .section::after { display: none !important; }
