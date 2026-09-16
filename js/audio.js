@@ -810,7 +810,11 @@ export async function play(id) {
   // new Audio() is a DOM element — instant, no hardware init. .play() returns a
   // Promise that resolves only if the browser can actually route audio to a device.
   // If coreaudiod is wedged, .play() will hang — we race it against a timeout.
-  if (!ctx && !deadCtx) {
+  // The canary guards against a wedged desktop audio driver (coreaudiod). Phone
+  // browsers routinely take longer than its 200ms budget to start a media element,
+  // which reads as a false "device lost", so skip it on touch devices.
+  const skipCanary = document.documentElement.classList.contains('is-mobile') || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (!ctx && !deadCtx && !skipCanary) {
     console.log('[audio] canary: testing audio pipeline with silent Audio element...');
     const silence = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
     silence.volume = 0;
