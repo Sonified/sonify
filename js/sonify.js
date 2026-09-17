@@ -7,7 +7,7 @@
  *      on the "work with Robert" page.
  */
 
-import { getStemAnalyser } from './audio.js?v=10';
+import { getStemAnalyser } from './audio.js?v=11';
 
 (function () {
   'use strict';
@@ -431,6 +431,12 @@ import { getStemAnalyser } from './audio.js?v=10';
       card.addEventListener('mouseenter', () => { hoverTarget = 1; kick(); });
       card.addEventListener('mouseleave', () => { hoverTarget = 0; kick(); });
     }
+
+    // ---- clicking through to meditatewiththesun.com (new tab) pauses the beat ----
+    if (card) card.addEventListener('click', () => {
+      const play = document.getElementById('seq-play');
+      if (play && play.classList.contains('clicked')) play.click(); // 'clicked' = playing (main.js setPlayState)
+    });
     const smooth = t => t * t * (3 - 2 * t);
     function stepHover(dt) {
       if (hoverT === hoverTarget) return false;
@@ -469,6 +475,10 @@ import { getStemAnalyser } from './audio.js?v=10';
 
     // ---- feedback renderer ----
     const TRAIL = { zoom: 1.995, decay: 0.10, radius: 0.77, amount: 0.55 };   // per-second dials
+    // Each sequencer kick gates the sun's injection off for ~100ms (audio.js calls
+    // this at the audible moment), so the beat radiates outward as dark rings.
+    let kickWaveUntil = 0;
+    window.SONIFY_ONKICK = () => { kickWaveUntil = performance.now() + 100; };
     const gl = cv && cv.getContext('webgl2', { alpha: false, antialias: false, premultipliedAlpha: false });
     let fx = null;
     if (gl) {
@@ -498,6 +508,7 @@ uniform float uRadius;
 uniform float uAmount;
 uniform float uMode;
 uniform float uBright;
+uniform float uSeed;
 out vec4 frag;
 vec3 sun(vec2 px) {
   vec2 s = (px - uSunRect.xy) / uSunRect.z;
@@ -516,7 +527,7 @@ void main() {
   vec3 s = sun(px);
   if (uMode < 0.5) {
     float gate = smoothstep(uRadius - 0.03, uRadius + 0.03, r);
-    frag = vec4(max(hist, s * gate), 1.0);
+    frag = vec4(max(hist, s * gate * uSeed), 1.0);
   } else {
     frag = vec4(min(vec3(1.0), mix(s, max(hist, s), uAmount) * uBright), 1.0);
   }
@@ -534,7 +545,7 @@ void main() {
       g.useProgram(prog);
       g.bindVertexArray(g.createVertexArray());
       const u = {};
-      for (const n of ['uPrev', 'uSun', 'uRes', 'uSunRect', 'uZoom', 'uDecay', 'uRadius', 'uAmount', 'uMode', 'uBright']) u[n] = g.getUniformLocation(prog, n);
+      for (const n of ['uPrev', 'uSun', 'uRes', 'uSunRect', 'uZoom', 'uDecay', 'uRadius', 'uAmount', 'uMode', 'uBright', 'uSeed']) u[n] = g.getUniformLocation(prog, n);
       g.uniform1i(u.uPrev, 0);
       g.uniform1i(u.uSun, 1);
       g.pixelStorei(g.UNPACK_FLIP_Y_WEBGL, true);
@@ -587,6 +598,9 @@ void main() {
         g.uniform1f(u.uRadius, TRAIL.radius);
         g.uniform1f(u.uAmount, Math.min(1, TRAIL.amount + 0.3 * synthLevel));
         g.uniform1f(u.uBright, 1 + 0.6 * L);   // brightness boost while the synth plays   // shines a little more when the synth plays
+        // Kick wave: each kick closes the seed injection for a moment, carving a
+        // dark ring at the rim that rides the flow outward.
+        g.uniform1f(u.uSeed, performance.now() < kickWaveUntil ? 0.0 : 1.0);
         g.viewport(0, 0, W, H);
         g.bindFramebuffer(g.FRAMEBUFFER, pong.fbo);
         g.uniform1f(u.uMode, 0);

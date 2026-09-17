@@ -569,6 +569,10 @@ function seqTriggerStep(pat) {
     src.connect(g);
     g.connect(seqMaster);
     src.start(t);
+    // Visual hook: the Meditate sun sends out a dark ring on each kick (js/sonify.js).
+    if (typeof window !== 'undefined' && window.SONIFY_ONKICK) {
+      setTimeout(window.SONIFY_ONKICK, Math.max(0, (t - seqAc.currentTime) * 1000));
+    }
   }
 
   // Hat
