@@ -1296,3 +1296,62 @@ html:not(.is-mobile) #citizen-science .pg-left { justify-content: space-between;
 
 /* Work with Robert: everything sits 5px closer to the top */
 html:not(.is-mobile) #contact .wwr-content { transform: translateY(-5px); }
+
+/* 8vb toggle beside the Solar Sequencer title: melody an octave down */
+.seq-octave {
+  display: inline-block;
+  vertical-align: 0.15em;
+  margin-left: 0.55rem;
+  width: 7.5ch;
+  text-align: center;
+  box-sizing: border-box;
+  padding: 0.1rem 0.45rem;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62em;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.seq-octave:hover { color: var(--text); border-color: rgba(212, 168, 67, 0.5); }
+.seq-octave.active {
+  color: var(--accent);
+  border-color: rgba(212, 168, 67, 0.75);
+  box-shadow: 0 0 12px rgba(212, 168, 67, 0.25);
+}
+
+/* Mode chip: wide enough for Mixolydian, so the label never resizes it */
+.seq-mode { width: 14ch; }
+
+/* Solar Synth beta tag */
+.beta-tag { font-size: 0.6em; font-weight: 400; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.5); vertical-align: 0.15em; margin-left: 0.3rem; }
+
+/* Tempo control: BPM readout with - / + (80..160) */
+.seq-tempo { display: inline-flex; gap: 0.05rem; vertical-align: 0.15em; margin-left: 0.55rem; }
+.seq-bpm-num { margin-right: 0.12rem !important; }
+.seq-tempo .seq-octave {
+  margin-left: 0;
+  vertical-align: baseline;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0;          /* trailing letter-space was dragging glyphs left of center */
+  padding-left: 0;
+  padding-right: 0;
+}
+.seq-bpm-num { width: 5ch; cursor: default; }
+.seq-bpm-btn { width: 2.6ch; }
+
+/* Tempo buttons at the rail: greyed out */
+.seq-bpm-btn:disabled { opacity: 0.35; cursor: default; }
+.seq-bpm-btn:disabled:hover { color: var(--text-dim); border-color: rgba(255, 255, 255, 0.22); }
+
+/* Randomize stands out a touch: lighter fill than its neighbors */
+#seq-randomize { background: rgba(99, 59, 27, 0.68); color: rgba(248, 185, 110, 0.94); }
+#seq-randomize:hover { background: rgba(115, 68, 31, 0.75); }
+
+/* Row labels right-align against the grid (degree numbers line up with HAT/KCK) */
+.seq-label { justify-content: flex-end; }

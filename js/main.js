@@ -3,8 +3,8 @@
  * Scroll reveals, dot nav, sound triggers, cursor glow, animated counters.
  */
 
-import { play, stop, killNow, seqRestart, seqSilence, getEndTime, now as audioNow, getStemPattern, generateStemPattern, setStemPattern, setSeqLoop, getSeqLoop, setSeqDelay, getSeqDelay, setSeqReverb, getSeqReverb, getHeroAnalyser, getHeroProgress, setOnAudioDeviceLost, setOnAudioDeviceRecovered } from './audio.js?v=13';
-import { initVisuals, onVisualsPause, onVisualsResume, onVisualsThrottle } from './visuals.js?v=42';
+import { play, stop, killNow, seqRestart, seqSilence, getEndTime, now as audioNow, getStemPattern, generateStemPattern, setStemPattern, setSeqLoop, getSeqLoop, setSeqDelay, getSeqDelay, setSeqReverb, getSeqReverb, getHeroAnalyser, getHeroProgress, setOnAudioDeviceLost, setOnAudioDeviceRecovered, cycleSeqOctave, setSeqOctave, SEQ_MODES, modePitches, getSeqPlayheadCol } from './audio.js?v=26';
+import { initVisuals, onVisualsPause, onVisualsResume, onVisualsThrottle } from './visuals.js?v=55';
 
 (function() {
   'use strict';
@@ -885,10 +885,10 @@ import { initVisuals, onVisualsPause, onVisualsResume, onVisualsThrottle } from 
     seqGrid.innerHTML = '';
     seqCells = [];
 
-    // Melody rows (always 5, high pitch to low)
+    // Melody rows: the octave top to bottom, labeled by scale degree (8 down to 1)
     const melodyRows = pattern.melodyRows || [];
     melodyRows.forEach((rowData, r) => {
-      addRow('SYN', rowData, 'syn');
+      addRow(String(melodyRows.length - r), rowData, 'syn');
     });
 
     // Hat + Kick
@@ -941,8 +941,8 @@ import { initVisuals, onVisualsPause, onVisualsResume, onVisualsThrottle } from 
   // Persist pattern across refreshes
   function savePattern() {
     try {
-      const { kick, hat, melodyRows, melodyFreqs, pitches, waveType, bpm, step, steps } = currentDisplayPattern;
-      localStorage.setItem('sonara-seq-pattern', JSON.stringify({ kick, hat, melodyRows, melodyFreqs, pitches, waveType, bpm, step, steps }));
+      const { kick, hat, melodyRows, melodyFreqs, pitches, waveType, bpm, step, steps, root, mode } = currentDisplayPattern;
+      localStorage.setItem('sonara-seq-pattern', JSON.stringify({ kick, hat, melodyRows, melodyFreqs, pitches, waveType, bpm, step, steps, root, mode }));
     } catch(e) {}
   }
   function loadPattern() {
@@ -968,15 +968,16 @@ import { initVisuals, onVisualsPause, onVisualsResume, onVisualsThrottle } from 
     };
     const kick = cells(p.kick, base.kick);
     const hat = cells(p.hat, base.hat);
-    const pitches = Array.isArray(p.pitches) && p.pitches.length === 5 && p.pitches.every(f => Number.isFinite(+f) && +f > 0)
+    let pitches = Array.isArray(p.pitches) && p.pitches.length >= 5 && p.pitches.length <= 8 && p.pitches.every(f => Number.isFinite(+f) && +f > 0)
       ? p.pitches.map(Number)
       : base.pitches;
+    while (pitches.length < 8) pitches = [...pitches, pitches[pitches.length - 1] / 2];   // legacy: silent low rows below
     const rows = Array.isArray(p.melodyRows) ? p.melodyRows : [];
     const zero = new Array(16).fill(0);
-    const melodyRows = Array.from({ length: 5 }, (_, r) => cells(rows[r], zero));
+    const melodyRows = Array.from({ length: 8 }, (_, r) => cells(rows[r], zero));
     const melodyFreqs = Array.from({ length: 16 }, (_, s) => {
       const on = [];
-      for (let r = 0; r < 5; r++) if (melodyRows[r][s]) on.push(pitches[r]);
+      for (let r = 0; r < 8; r++) if (melodyRows[r][s]) on.push(pitches[r]);
       return on;
     });
     const bpm = Number.isFinite(+p.bpm) ? Math.min(240, Math.max(40, +p.bpm)) : base.bpm;
@@ -984,6 +985,8 @@ import { initVisuals, onVisualsPause, onVisualsResume, onVisualsThrottle } from 
       kick, hat, melodyRows, melodyFreqs, pitches,
       waveType: typeof p.waveType === 'string' && p.waveType ? p.waveType.slice(0, 16) : base.waveType,
       bpm, step: 60 / bpm / 2, steps: 16,
+      root: Number.isFinite(+p.root) && +p.root > 0 ? +p.root : 0,
+      mode: SEQ_MODES.includes(p.mode) ? p.mode : 'ionian',
     };
   }
 
@@ -1007,14 +1010,86 @@ import { initVisuals, onVisualsPause, onVisualsResume, onVisualsThrottle } from 
   setTimeout(matchVisualHeights, 100);
   window.addEventListener('resize', matchVisualHeights);
 
+  // Mode chip: cycles the seven modes; the current pattern keeps its rows and
+  // re-tunes its pitches to the new mode around the same root.
+  const modeBtn = document.getElementById('seq-mode');
+  const modeLabel = m => m === 'ionian' ? 'Major' : m === 'aeolian' ? 'Minor' : m.charAt(0).toUpperCase() + m.slice(1);
+  function applyMode(mode) {
+    const pat = currentDisplayPattern;
+    pat.mode = mode;
+    if (!(pat.root > 0)) pat.root = 261.63;
+    pat.pitches = modePitches(pat.root, mode);
+    updateMelodyFreqs();
+    setStemPattern(pat);
+    savePattern();
+    if (modeBtn) modeBtn.textContent = modeLabel(mode);
+  }
+  if (modeBtn) {
+    modeBtn.textContent = modeLabel(currentDisplayPattern.mode || 'ionian');
+    modeBtn.addEventListener('click', () => {
+      const cur = SEQ_MODES.indexOf(currentDisplayPattern.mode || 'ionian');
+      applyMode(SEQ_MODES[(cur + 1) % SEQ_MODES.length]);
+    });
+  }
+
+  // Tempo: - / + around the BPM readout, 80..160 in steps of 5. Applies live.
+  const bpmNum = document.getElementById('seq-bpm');
+  const bpmDown = document.getElementById('seq-bpm-down');
+  const bpmUp = document.getElementById('seq-bpm-up');
+  function showBpm() {
+    const bpm = Math.round(currentDisplayPattern.bpm || 125);
+    if (bpmNum) bpmNum.textContent = String(bpm);
+    if (bpmDown) bpmDown.disabled = bpm <= 80;
+    if (bpmUp) bpmUp.disabled = bpm >= 160;
+  }
+  function nudgeBpm(delta) {
+    const pat = currentDisplayPattern;
+    pat.bpm = Math.max(80, Math.min(160, Math.round((pat.bpm || 125) + delta)));
+    pat.step = 60 / pat.bpm / 2;
+    setStemPattern(pat);
+    savePattern();
+    showBpm();
+  }
+  bpmDown?.addEventListener('click', () => nudgeBpm(-5));
+  bpmUp?.addEventListener('click', () => nudgeBpm(5));
+  showBpm();
+
+  // 8vb cycles the melody: standard -> 8vb (one octave down) -> 15mb (two
+  // octaves, a fifteenth) -> standard.
+  const octaveBtn = document.getElementById('seq-octave');
+  function showOctave(down) {
+    if (!octaveBtn) return;
+    octaveBtn.textContent = down === 'rand' ? 'Rand' : down === 0 ? '0oct' : `-${down}oct`;
+    octaveBtn.classList.toggle('active', down !== 0);
+    octaveBtn.title = down === 'rand' ? 'Every step plays at a random octave — click to reset' : 'Cycle the melody down an octave at a time';
+  }
+  if (octaveBtn) {
+    // Restore the saved octave setting (0..3 or 'rand'); shares carry it too.
+    let savedOct = null;
+    try { savedOct = localStorage.getItem('sonara-seq-octave'); } catch (e) {}
+    if (savedOct != null) {
+      const v = savedOct === 'rand' ? 'rand' : Math.max(0, Math.min(3, Math.round(+savedOct) || 0));
+      setSeqOctave(v);
+      showOctave(v);
+    }
+    octaveBtn.addEventListener('click', () => {
+      const down = cycleSeqOctave();
+      showOctave(down);
+      try { localStorage.setItem('sonara-seq-octave', String(down)); } catch (e) {}
+    });
+  }
+
   // Toolbar buttons
   const randomizeBtn = document.getElementById('seq-randomize');
   if (randomizeBtn) {
     randomizeBtn.addEventListener('click', () => {
-      currentDisplayPattern = generateStemPattern();
+      const keepBpm = currentDisplayPattern.bpm;
+      currentDisplayPattern = generateStemPattern(currentDisplayPattern.mode || 'ionian');
+      if (keepBpm > 0) { currentDisplayPattern.bpm = keepBpm; currentDisplayPattern.step = 60 / keepBpm / 2; }
       setStemPattern(currentDisplayPattern);
       buildGrid(currentDisplayPattern);
       savePattern();
+      showBpm();
     });
   }
 
@@ -1078,9 +1153,14 @@ import { initVisuals, onVisualsPause, onVisualsResume, onVisualsThrottle } from 
     if (shouldSkip()) return;
     const pattern = getStemPattern();
     if (pattern && seqPlaying && seqCells.length) {
-      const elapsed = audioNow() - pattern.startTime;
-      let col = Math.floor(elapsed / pattern.step);
-      if (getSeqLoop()) col = ((col % 16) + 16) % 16;
+      // The engine reports the audible column directly (live-tempo safe);
+      // time math is only the fallback for the tail after a non-looping run.
+      let col = getSeqPlayheadCol();
+      if (col < 0) {
+        const elapsed = audioNow() - pattern.startTime;
+        col = Math.floor(elapsed / pattern.step);
+        if (getSeqLoop()) col = ((col % 16) + 16) % 16;
+      }
 
 
 

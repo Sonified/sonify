@@ -84,8 +84,8 @@
     html.deep-linking body { opacity: 0; }
     html.deep-landed body { transition: opacity 0.35s ease; }
   </style>
-  <link rel="stylesheet" href="styles.css?v=1">
-  <link rel="stylesheet" href="sonify.css?v=104">
+  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="sonify.css?v=125">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -229,8 +229,8 @@
       </div>
       <div class="seq-toolbar">
         <button class="seq-play" id="seq-play"><span style="vertical-align: 2px;">&#9654;</span> Play</button>
-        <button class="seq-loop" id="seq-loop"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px;"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg> Loop</button>
         <button class="seq-randomize" id="seq-randomize">Randomize</button>
+        <button class="seq-loop" id="seq-loop"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px;"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg> Loop</button>
         <button class="seq-randomize seq-share" id="seq-share" type="button">Share</button>
         <span class="seq-share-toast" id="seq-share-toast" role="status" aria-live="polite"></span>
       </div>
@@ -239,7 +239,7 @@
           <div class="instrument-visual sequencer-visual">
             <div class="seq-grid" id="seq-grid"></div>
           </div>
-          <h3>Solar <span class="contact-accent-word" style="color: var(--accent);">Sequencer</span></h3>
+          <h3>Solar <span class="contact-accent-word" style="color: var(--accent);">Sequencer</span> <button type="button" id="seq-mode" class="seq-octave seq-mode" title="Cycle the melody's mode">Major</button> <button type="button" id="seq-octave" class="seq-octave" title="Melody down an octave">0oct</button> <span class="seq-tempo"><span id="seq-bpm" class="seq-octave seq-bpm-num" title="Tempo (BPM)">125</span><button type="button" id="seq-bpm-down" class="seq-octave seq-bpm-btn" title="Slower">&minus;</button><button type="button" id="seq-bpm-up" class="seq-octave seq-bpm-btn" title="Faster">+</button></span></h3>
           <p>A rhythmic pattern generator using audified satellite data as source material. Click cells to change the beat.</p>
         </div>
         <div class="instrument-card">
@@ -257,7 +257,7 @@
             </div>
             <canvas id="synth-wave-canvas"></canvas>
           </div>
-          <h3>Solar <span class="contact-accent-word" style="color: var(--accent);">Synth</span></h3>
+          <h3>Solar <span class="contact-accent-word" style="color: var(--accent);">Synth</span> <span class="beta-tag">(open beta)</span></h3>
           <p>A wavetable synthesizer that loads audified satellite data as oscillator sources. Play the magnetosphere.</p>
         </div>
         <a class="instrument-card meditate-card" href="https://meditatewiththesun.com/" target="_blank" rel="noopener">
@@ -430,11 +430,11 @@
        the DOM is in its final order before visuals/audio initialize. -->
   <script src="js/pages.js?v=13"></script>
   <script src="js/rays.js?v=9"></script>
-  <script type="module" src="js/audio.js?v=13"></script>
-  <script type="module" src="js/visuals.js?v=42"></script>
-  <script type="module" src="js/main.js?v=49"></script>
+  <script type="module" src="js/audio.js?v=26"></script>
+  <script type="module" src="js/visuals.js?v=55"></script>
+  <script type="module" src="js/main.js?v=66"></script>
   <script src="js/contact-form.js?v=12"></script>
-  <script src="js/share.js?v=5"></script>
-  <script type="module" src="js/sonify.js?v=28"></script>
+  <script src="js/share.js?v=6"></script>
+  <script type="module" src="js/sonify.js?v=42"></script>
 </body>
 </html>

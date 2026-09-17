@@ -424,7 +424,27 @@ async function citizenScienceSound(ac, master) {
 }
 
 // ===== STEM-MUSIC: Pattern generation + playback =====
-export function generateStemPattern() {
+// The seven modes as semitone steps from the root; rows are the complete
+// octave — all seven degrees plus the octave on top.
+export const SEQ_MODES = ['ionian', 'aeolian', 'dorian', 'phrygian', 'lydian', 'mixolydian', 'locrian'];   // Major, Minor, then the deeper cuts
+const MODE_SEMITONES = {
+  ionian:     [0, 2, 4, 5, 7, 9, 11, 12],
+  dorian:     [0, 2, 3, 5, 7, 9, 10, 12],
+  phrygian:   [0, 1, 3, 5, 7, 8, 10, 12],
+  lydian:     [0, 2, 4, 6, 7, 9, 11, 12],
+  mixolydian: [0, 2, 4, 5, 7, 9, 10, 12],
+  aeolian:    [0, 2, 3, 5, 7, 8, 10, 12],
+  locrian:    [0, 1, 3, 5, 6, 8, 10, 12],
+};
+const MODE_DEGREES = [0, 1, 2, 3, 4, 5, 6, 7];   // the full scale, root to octave
+
+// Eight pitches for a root+mode, high→low (one per sequencer row).
+export function modePitches(root, mode) {
+  const semis = MODE_SEMITONES[mode] || MODE_SEMITONES.ionian;
+  return MODE_DEGREES.map(d => root * Math.pow(2, semis[d] / 12)).sort((a, b) => b - a);
+}
+
+export function generateStemPattern(mode = 'ionian', arg_root = 0) {
   const bpm = 125;
   const step = 60 / bpm / 2;
 
@@ -450,14 +470,10 @@ export function generateStemPattern() {
     hat[i] = Math.random() < (offBeat ? 0.5 : 0.15) ? 1 : 0;
   }
 
-  // Melody — single octave, 5 notes = 5 rows (one pitch per row)
-  const scales = [
-    [261.63, 293.66, 329.63, 392, 440],       // C4 D4 E4 G4 A4
-    [293.66, 329.63, 392, 440, 523.25],       // D4 E4 G4 A4 C5
-    [349.23, 392, 440, 523.25, 587.33],       // F4 G4 A4 C5 D5
-  ];
-  const scale = scales[Math.floor(Math.random() * scales.length)];
-  const pitches = [...scale].sort((a, b) => b - a); // high→low, 5 pitches = 5 rows
+  // Melody — 8 rows: the complete octave of the chosen mode.
+  const roots = [261.63, 293.66, 349.23];     // C4, D4, F4
+  const root = arg_root || roots[Math.floor(Math.random() * roots.length)];
+  const pitches = modePitches(root, mode);    // high→low, 6 pitches = 6 rows
   const melodyRows = pitches.map(() => new Array(16).fill(0));
   const melodyFreqs = Array.from({ length: 16 }, () => []);
 
@@ -474,16 +490,36 @@ export function generateStemPattern() {
     return 15;
   }
 
-  for (let n = 0; n < noteCount; n++) {
-    const stepIdx = weightedStep();
-    const rowIdx = Math.floor(Math.random() * 5);
+  // A melody, not dice: a random walk over scale degrees. Small moves (2nds and
+  // 3rds) are favored, chord tones (1-3-5-8) pull harder than color tones, and
+  // about a fifth of notes pick up a third below for instant sweetness.
+  const DEGREE_PULL = [4, 2, 4, 1, 4, 2.5, 1.5, 3];   // root,2nd,3rd,4th,5th,6th,7th,octave
+  const CHORD_TONES = [0, 2, 4, 7];
+  const stepList = [...new Set(Array.from({ length: noteCount }, weightedStep))].sort((a, b) => a - b);
+  const put = (deg, stepIdx) => {
+    const rowIdx = pitches.length - 1 - deg;          // row 0 = octave, row 7 = root
     melodyRows[rowIdx][stepIdx] = 1;
-    if (!melodyFreqs[stepIdx].includes(pitches[rowIdx])) {
-      melodyFreqs[stepIdx].push(pitches[rowIdx]);
+    if (!melodyFreqs[stepIdx].includes(pitches[rowIdx])) melodyFreqs[stepIdx].push(pitches[rowIdx]);
+  };
+  let deg = CHORD_TONES[Math.floor(Math.random() * CHORD_TONES.length)];
+  for (const stepIdx of stepList) {
+    const moveW = m => Math.abs(m) === 2 ? 3 : Math.abs(m) === 1 ? 2.2 : m === 0 ? 1.2 : Math.abs(m) === 3 ? 1.5 : 0.7;
+    const pool = [];
+    let total = 0;
+    for (let m = -4; m <= 4; m++) {
+      const d = deg + m;
+      if (d < 0 || d > 7) continue;
+      const w = moveW(m) * DEGREE_PULL[d];
+      pool.push([d, w]);
+      total += w;
     }
+    let r = Math.random() * total;
+    for (const [d, w] of pool) { r -= w; if (r <= 0) { deg = d; break; } }
+    put(deg, stepIdx);
+    if (Math.random() < 0.22 && deg >= 2) put(deg - 2, stepIdx);   // a third below
   }
 
-  return { kick, hat, melodyRows, melodyFreqs, pitches, waveType, bpm, step, steps: 16 };
+  return { kick, hat, melodyRows, melodyFreqs, pitches, waveType, bpm, step, steps: 16, root, mode };
 }
 
 // Live step sequencer — one central clock, triggers notes per step
@@ -492,6 +528,11 @@ let seqStep = 0;
 let seqAc = null;
 let seqMaster = null;
 let seqFilterNode = null;   // master lowpass: the Meditate sun's hover filter
+let seqOctaveMult = 1;      // 8vb: melody an octave down
+let seqTempoBend = 0;       // Meditate sun hover: -20..+20 BPM around the pattern's tempo
+let seqLastTrig = null;     // { col, at }: the most recently scheduled step
+let seqTrigPrev = -1;
+let seqSustainMult = 1;     // Meditate sun hover: top of the sun = longer notes, bottom = shorter
 let seqSynthBus = null;
 let seqRevG = null;
 let seqConv = null;
@@ -569,6 +610,40 @@ export function setStemFilter(amount) {
   seqFilterNode.frequency.setTargetAtTime(f, seqAc.currentTime, 0.08);
 }
 
+// The Meditate sun stretches note sustain while hovered (1 = standard).
+export function setStemSustain(mult) {
+  seqSustainMult = Math.max(0.5, Math.min(2.5, +mult || 1));
+}
+
+// The Meditate sun bends the tempo while hovered (applied at each step).
+export function setStemTempoBend(delta) {
+  seqTempoBend = Math.max(-30, Math.min(30, +delta || 0));
+}
+
+// Octave cycle: standard -> -1 -> -2 -> -3 -> Rand (every step rolls its own
+// octave) -> standard. Returns octaves down (0..3) or 'rand'.
+let seqOctaveRand = false;
+// Restore a saved octave setting: 0..3 (octaves down) or 'rand'.
+export function setSeqOctave(v) {
+  if (v === 'rand') { seqOctaveRand = true; seqOctaveMult = 1; return; }
+  const n = Math.max(0, Math.min(3, Math.round(+v) || 0));
+  seqOctaveRand = false;
+  seqOctaveMult = Math.pow(0.5, n);
+}
+export function cycleSeqOctave() {
+  if (seqOctaveRand) { seqOctaveRand = false; seqOctaveMult = 1; return 0; }
+  if (seqOctaveMult <= 0.125) { seqOctaveRand = true; seqOctaveMult = 1; return 'rand'; }
+  seqOctaveMult = seqOctaveMult / 2;
+  return Math.round(Math.log2(1 / seqOctaveMult));
+}
+
+// Which column is audibly playing right now (-1 = nothing yet). Live-tempo
+// safe: it reports what the engine actually scheduled, not derived time math.
+export function getSeqPlayheadCol() {
+  if (!seqAc || !seqLastTrig) return -1;
+  return seqAc.currentTime >= seqLastTrig.at ? seqLastTrig.col : seqTrigPrev;
+}
+
 export function setSeqLoop(val) {
   // When turning off loop, reset step to current position within the bar
   // so the sequence finishes the current pass instead of stopping immediately
@@ -583,6 +658,8 @@ export function getSeqLoop() { return seqLooping; }
 function seqTriggerStep(pat) {
   const col = seqStep % 16;
   const t = seqAc.currentTime + 0.05;
+  seqTrigPrev = seqLastTrig ? seqLastTrig.col : -1;
+  seqLastTrig = { col, at: t };   // the playhead visual follows the engine, not time math
   const step = pat.step;
   const wt = getSelectedWavetable();
 
@@ -620,12 +697,14 @@ function seqTriggerStep(pat) {
   // Melody
   const freqs = pat.melodyFreqs[col];
   if (freqs && freqs.length) {
+    // Rand octave mode: the whole step drops together (0..3 octaves), a new roll per step
+    const octMult = seqOctaveRand ? Math.pow(0.5, Math.floor(Math.random() * 4)) : seqOctaveMult;
     const voiceGain = 0.04 / Math.max(freqs.length, 1);
     freqs.forEach(freq => {
       const osc = seqAc.createOscillator();
       if (wt) osc.setPeriodicWave(wt);
       else osc.type = pat.waveType;
-      osc.frequency.value = freq;
+      osc.frequency.value = freq * octMult;
       osc.detune.value = (Math.random() - 0.5) * 10;
       const lp = seqAc.createBiquadFilter();
       lp.type = 'lowpass';
@@ -634,12 +713,12 @@ function seqTriggerStep(pat) {
       const g = seqAc.createGain();
       g.gain.setValueAtTime(0, t);
       g.gain.linearRampToValueAtTime(voiceGain + Math.random() * 0.02, t + 0.05);
-      g.gain.exponentialRampToValueAtTime(0.001, t + step * 1.5 + Math.random() * step);
+      g.gain.exponentialRampToValueAtTime(0.001, t + (step * 1.5 + Math.random() * step) * seqSustainMult);
       osc.connect(lp);
       lp.connect(g);
       g.connect(seqSynthBus);
       osc.start(t);
-      osc.stop(t + step * 2);
+      osc.stop(t + step * 2 * seqSustainMult);
     });
   }
 
@@ -709,10 +788,17 @@ async function stemMusicSound(ac, master, prePattern) {
   // Clear previous interval
   if (seqInterval) clearInterval(seqInterval);
 
-  // Start stepping
-  const stepMs = pat.step * 1000;
+  // Start stepping, locked to the audio clock. Each step books the next one at
+  // an absolute time (nextAt), so timer lateness never accumulates and tempo
+  // changes (BPM control + the sun's live bend) stay phase-aligned.
+  const stepNowMs = () => {
+    const cur = pendingStemPattern || pat;   // live tempo: edits apply mid-groove
+    const bpm = ((cur.bpm > 0 ? cur.bpm : 125) + seqTempoBend);
+    return (60 / bpm / 2) * 1000;
+  };
+  let nextAt = ac.currentTime;               // audio-clock anchor for the next step
   seqTriggerStep(pat); // trigger step 0 immediately
-  seqInterval = setInterval(() => {
+  const seqTick = () => {
     // Stop after 16 steps when not looping
     if (seqStep >= 16 && !seqLooping) {
       clearInterval(seqInterval);
@@ -737,7 +823,12 @@ async function stemMusicSound(ac, master, prePattern) {
     }
     const current = pendingStemPattern || pat;
     seqTriggerStep(current);
-  }, stepMs);
+    nextAt += stepNowMs() / 1000;
+    if (nextAt < ac.currentTime - 0.2) nextAt = ac.currentTime;   // resync after a stall (hidden tab)
+    seqInterval = setTimeout(seqTick, Math.max(0, (nextAt - ac.currentTime) * 1000));
+  };
+  nextAt = ac.currentTime + stepNowMs() / 1000;
+  seqInterval = setTimeout(seqTick, stepNowMs());
 
   const pattern = { ...pat, startTime: ac.currentTime };
   return { nodes: [], gains: [seqRevG], duration: 16 * pat.step, pattern, synthBus: seqSynthBus };

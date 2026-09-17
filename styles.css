@@ -1277,9 +1277,9 @@ a:hover { opacity: 0.7; }
   padding-right: 6px;
   white-space: nowrap;
 }
-.seq-row-syn .seq-label { color: rgba(240, 170, 95, 1); }
-.seq-row-hat .seq-label { color: rgba(80, 190, 190, 1); }
-.seq-row-kck .seq-label { color: rgba(212, 168, 67, 1); }
+.seq-row-syn .seq-label { color: rgba(218, 158, 18, 1); }
+.seq-row-hat .seq-label { color: rgba(255, 244, 205, 1); }
+.seq-row-kck .seq-label { color: rgba(205, 105, 30, 1); }
 
 .seq-cell {
   aspect-ratio: 1;
@@ -1291,41 +1291,41 @@ a:hover { opacity: 0.7; }
 }
 
 /* Row-colored inactive cells */
-.seq-row-syn .seq-cell { background: rgba(240, 170, 95, 0.06); border-color: rgba(240, 170, 95, 0.1); }
-.seq-row-hat .seq-cell { background: rgba(80, 190, 190, 0.06); border-color: rgba(80, 190, 190, 0.1); }
-.seq-row-kck .seq-cell { background: rgba(212, 168, 67, 0.06); border-color: rgba(212, 168, 67, 0.1); }
+.seq-row-syn .seq-cell { background: rgba(218, 158, 18, 0.06); border-color: rgba(218, 158, 18, 0.1); }
+.seq-row-hat .seq-cell { background: rgba(255, 244, 205, 0.07); border-color: rgba(255, 244, 205, 0.12); }
+.seq-row-kck .seq-cell { background: rgba(205, 105, 30, 0.08); border-color: rgba(205, 105, 30, 0.12); }
 
-/* Synth rows — purple */
+/* Synth rows — sun gold (same family as the synth data line) */
 .seq-row-syn .seq-cell.active {
-  background: rgba(232, 145, 60, 0.3);
-  border-color: rgba(232, 145, 60, 0.4);
+  background: rgba(218, 158, 18, 0.32);
+  border-color: rgba(218, 158, 18, 0.42);
 }
 .seq-row-syn .seq-cell.active.lit {
-  background: rgba(232, 145, 60, 0.85);
-  border-color: rgba(255, 196, 120, 0.9);
-  box-shadow: 0 0 10px rgba(232, 145, 60, 0.5);
+  background: rgba(255, 205, 80, 0.85);
+  border-color: rgba(255, 225, 130, 0.9);
+  box-shadow: 0 0 10px rgba(255, 205, 80, 0.5);
 }
 
-/* Hat row — cyan/teal */
+/* Hat row — bright pale gold (hats flash the sun brighter) */
 .seq-row-hat .seq-cell.active {
-  background: rgba(80, 190, 190, 0.3);
-  border-color: rgba(80, 190, 190, 0.4);
+  background: rgba(255, 246, 215, 0.38);
+  border-color: rgba(255, 248, 225, 0.5);
 }
 .seq-row-hat .seq-cell.active.lit {
-  background: rgba(80, 210, 210, 0.85);
-  border-color: rgba(120, 230, 230, 0.9);
-  box-shadow: 0 0 10px rgba(80, 190, 190, 0.5);
+  background: rgba(255, 252, 235, 0.95);
+  border-color: rgba(255, 255, 245, 0.98);
+  box-shadow: 0 0 10px rgba(255, 248, 210, 0.6);
 }
 
-/* Kick row — warm orange */
+/* Kick row — darker orange (kicks carve the dark rings) */
 .seq-row-kck .seq-cell.active {
-  background: rgba(212, 168, 67, 0.3);
-  border-color: rgba(212, 168, 67, 0.4);
+  background: rgba(205, 105, 30, 0.34);
+  border-color: rgba(205, 105, 30, 0.45);
 }
 .seq-row-kck .seq-cell.active.lit {
-  background: rgba(230, 180, 70, 0.85);
-  border-color: rgba(245, 200, 100, 0.9);
-  box-shadow: 0 0 10px rgba(212, 168, 67, 0.5);
+  background: rgba(225, 118, 35, 0.88);
+  border-color: rgba(240, 145, 60, 0.9);
+  box-shadow: 0 0 10px rgba(215, 110, 30, 0.5);
 }
 
 .seq-cell.playhead {

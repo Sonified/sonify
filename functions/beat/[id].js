@@ -23,6 +23,7 @@ export async function onRequestGet({ request, params, env }) {
     'sonara-loop': state.loop ? '1' : '0',
   };
   if (state.wavetable) store['sonara-wavetable'] = state.wavetable;
+  if (state.octave != null) store['sonara-seq-octave'] = String(state.octave);
   const loader = `<script>(function(){try{var s=${JSON.stringify(store).replace(/</g, '\\u003c')};for(var k in s)localStorage.setItem(k,s[k]);}catch(e){}if(!location.hash)history.replaceState(null,'',location.pathname+location.search+'#play');})();</script>`;
 
   const meta = [

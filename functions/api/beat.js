@@ -24,7 +24,7 @@ const bool = v => v === true;
 // The sequencer's exact schema: 16 steps, 5 melody rows, 5 pitches, melodyFreqs
 // derived from rows+pitches. Whatever arrives is normalized into that shape, so
 // a stored beat can never carry a pattern that breaks the page that loads it.
-const DEFAULT_PITCHES = [440, 392, 329.63, 293.66, 261.63]; // A4 G4 E4 D4 C4, high→low
+const DEFAULT_PITCHES = [523.25, 493.88, 440, 392, 349.23, 329.63, 293.66, 261.63]; // C major, C5 down to C4
 
 function cleanState(s) {
   if (!s || typeof s !== 'object') return null;
@@ -37,24 +37,29 @@ function cleanState(s) {
   };
   const kick = cells(p.kick);
   const hat = cells(p.hat);
-  const pitches = Array.isArray(p.pitches) && p.pitches.length === 5 && p.pitches.every(f => Number.isFinite(+f) && +f > 0)
+  let pitches = Array.isArray(p.pitches) && p.pitches.length >= 5 && p.pitches.length <= 8 && p.pitches.every(f => Number.isFinite(+f) && +f > 0)
     ? p.pitches.map(Number)
     : DEFAULT_PITCHES;
+  while (pitches.length < 8) pitches = [...pitches, pitches[pitches.length - 1] / 2];   // legacy shorter patterns
   const rows = Array.isArray(p.melodyRows) ? p.melodyRows : [];
-  const melodyRows = Array.from({ length: 5 }, (_, r) => cells(rows[r]));
+  const melodyRows = Array.from({ length: 8 }, (_, r) => cells(rows[r]));
   const melodyFreqs = Array.from({ length: 16 }, (_, i) => {
     const on = [];
-    for (let r = 0; r < 5; r++) if (melodyRows[r][i]) on.push(pitches[r]);
+    for (let r = 0; r < 8; r++) if (melodyRows[r][i]) on.push(pitches[r]);
     return on;
   });
   const bpm = Number.isFinite(+p.bpm) ? Math.min(240, Math.max(40, +p.bpm)) : 100;
+  const MODES = ['ionian', 'dorian', 'phrygian', 'lydian', 'mixolydian', 'aeolian', 'locrian'];
   const pattern = {
     kick, hat, melodyRows, melodyFreqs, pitches,
     waveType: typeof p.waveType === 'string' && p.waveType ? p.waveType.slice(0, 16) : 'sine',
     bpm, step: 60 / bpm / 2, steps: 16,
+    root: Number.isFinite(+p.root) && +p.root > 0 && +p.root < 4000 ? +p.root : 0,
+    mode: MODES.includes(p.mode) ? p.mode : 'ionian',
   };
   const wavetable = typeof s.wavetable === 'string' && /^[\w.-]{1,64}$/.test(s.wavetable) ? s.wavetable : null;
-  return { pattern, wavetable, reverb: bool(s.reverb), delay: bool(s.delay), loop: bool(s.loop) };
+  const octave = s.octave === 'rand' ? 'rand' : Math.max(0, Math.min(3, Math.round(+s.octave) || 0));
+  return { pattern, wavetable, reverb: bool(s.reverb), delay: bool(s.delay), loop: bool(s.loop), octave };
 }
 
 export async function onRequestPost({ request, env }) {

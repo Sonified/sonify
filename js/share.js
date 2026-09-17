@@ -12,7 +12,7 @@
   if (!btn) return;
 
   const TITLE = 'Check out this beat I made with the sun';
-  const KEYS = ['sonara-seq-pattern', 'sonara-wavetable', 'sonara-reverb', 'sonara-delay', 'sonara-loop'];
+  const KEYS = ['sonara-seq-pattern', 'sonara-wavetable', 'sonara-reverb', 'sonara-delay', 'sonara-loop', 'sonara-seq-octave'];
 
   function readState() {
     const get = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
@@ -25,6 +25,7 @@
       reverb: get('sonara-reverb') === '1',
       delay: get('sonara-delay') === '1',
       loop: get('sonara-loop') === '1',
+      octave: (v => v === 'rand' ? 'rand' : Math.max(0, Math.min(3, Math.round(+v) || 0)))(get('sonara-seq-octave')),
     };
   }
 

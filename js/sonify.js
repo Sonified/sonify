@@ -7,7 +7,7 @@
  *      on the "work with Robert" page.
  */
 
-import { getStemAnalyser, setStemFilter, setStemSpace } from './audio.js?v=13';
+import { getStemAnalyser, setStemFilter, setStemSpace, setStemTempoBend, setStemSustain } from './audio.js?v=26';
 
 (function () {
   'use strict';
@@ -425,11 +425,13 @@ import { getStemAnalyser, setStemFilter, setStemSpace } from './audio.js?v=13';
     else window.addEventListener('load', startBuffering, { once: true });
 
     // ---- hover: speed 1x -> 4x and size REST -> FULL, eased ----
-    const SCALE_REST = 1.26, SCALE_FULL = 1.4, RAMP_MS = 500;
+    const SCALE_REST = 1.134, SCALE_FULL = 1.26, RAMP_MS = 500;   // 10% smaller
     let hoverT = 0, hoverTarget = 0, lastTs = 0;
     let filtT = 0, filtTarget = 0;   // mouse height over the video: top = open, bottom = dark
     let spinT = 0, spinTarget = 0;   // mouse across the video: slows left, speeds right
     let spaceT = 0, spaceTarget = 0; // mouse across the video: dry left, spacious right
+    let tempoT = 0, tempoTarget = 0; // mouse across the video: -20..+20 BPM
+    let sustT = 1, sustTarget = 1;   // mouse height: top = longer notes (1.8x), bottom = shorter (0.7x)
     if (card && matchMedia('(hover: hover)').matches) {
       card.addEventListener('mouseenter', () => { hoverTarget = 1; kick(); });
       card.addEventListener('mouseleave', () => { hoverTarget = 0; filtTarget = 0; kick(); });
@@ -439,18 +441,24 @@ import { getStemAnalyser, setStemFilter, setStemSpace } from './audio.js?v=13';
       surf.addEventListener('mousemove', e => {
         const r = surf.getBoundingClientRect();
         filtTarget = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+        sustTarget = filtTarget <= 0.5 ? 1 + (0.5 - filtTarget) * 1.6 : 1 - (filtTarget - 0.5) * 0.6;
         const xn = Math.min(1, Math.max(-1, ((e.clientX - r.left) / r.width) * 2 - 1));
         spinTarget = xn < 0 ? xn * 2 : xn * 4;   // left up to -2x, right up to +4x
         spaceTarget = xn;                        // left dry, right spacious (delay + reverb)
+        tempoTarget = xn * 20;                   // left -20 BPM, right +20 BPM
         kick();
       });
-      surf.addEventListener('mouseleave', () => { filtTarget = 0; spinTarget = 0; spaceTarget = 0; kick(); });
+      surf.addEventListener('mouseleave', () => { filtTarget = 0; spinTarget = 0; spaceTarget = 0; tempoTarget = 0; sustTarget = 1; kick(); });
     }
     function stepFilter(dt) {
       const k = Math.min(1, dt * 6);
       spinT += (spinTarget - spinT) * k;
       const nextSpace = spaceT + (spaceTarget - spaceT) * k;
       if (Math.abs(nextSpace - spaceT) > 0.0005) { spaceT = nextSpace; setStemSpace(spaceT); }
+      const nextTempo = tempoT + (tempoTarget - tempoT) * k;
+      if (Math.abs(nextTempo - tempoT) > 0.005) { tempoT = nextTempo; setStemTempoBend(tempoT); }
+      const nextSust = sustT + (sustTarget - sustT) * k;
+      if (Math.abs(nextSust - sustT) > 0.002) { sustT = nextSust; setStemSustain(sustT); }
       const next = filtT + (filtTarget - filtT) * k;
       if (Math.abs(next - filtT) < 0.0005 && Math.abs(filtTarget - filtT) < 0.001) return false;
       filtT = next;
