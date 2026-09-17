@@ -805,3 +805,9 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 
 /* Phones: email centered under the Start a conversation button */
 .is-mobile .wwr-email { align-self: center; text-align: center; }
+
+/* Logo tiles are credentials, not controls: no hover highlight, no pointer, no tap flash */
+.wwr-logo, .wwr-logo:hover { border-color: rgba(255, 255, 255, 0.08); background: rgba(15, 15, 20, 0.78); cursor: default; }
+.wwr-logo:hover img { opacity: 0.92; }
+.wwr-logos, .wwr-logo, .wwr-logo img { -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; -webkit-user-drag: none; }
+.wwr-logo img { pointer-events: none; }
