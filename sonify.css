@@ -954,3 +954,4 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 /* Readability: brighter secondary text site-wide (Sonara's #8a8a92 was too dim) */
 :root { --text-dim: #bdbab4; }
 .pg-caption { opacity: 0.9; }
+.cf-hint { text-transform: none; letter-spacing: 0.02em; font-size: 0.72rem; margin-left: 0.4rem; opacity: 0.8; }

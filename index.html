@@ -29,7 +29,7 @@
     })();
   </script>
   <link rel="stylesheet" href="styles.css?v=1">
-  <link rel="stylesheet" href="sonify.css?v=38">
+  <link rel="stylesheet" href="sonify.css?v=39">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -292,18 +292,27 @@
           </div>
 
           <fieldset class="cf-group" data-required>
-            <legend class="cf-label">Which best describes you? <b>*</b></legend>
-            <div class="cf-chips cf-chips-stack">
-              <label class="cf-chip"><input type="radio" name="role" value="Student seeking 1-on-1 mentorship" data-type="student" required><span>Student seeking 1-on-1 mentorship</span></label>
-              <label class="cf-chip"><input type="radio" name="role" value="Educator/school seeking a workshop" data-type="educator"><span>Educator/school seeking a workshop</span></label>
-              <label class="cf-chip"><input type="radio" name="role" value="Corporate client seeking a commission" data-type="corporate"><span>Corporate client seeking a commission</span></label>
-              <label class="cf-chip"><input type="radio" name="role" value="Researcher interested in sonification" data-type="researcher"><span>Researcher interested in sonification</span></label>
-              <label class="cf-chip"><input type="radio" name="role" value="__other_option__" data-type="other"><span>Other</span></label>
+            <legend class="cf-label">I am a... <b>*</b></legend>
+            <div class="cf-chips">
+              <label class="cf-chip"><input type="radio" name="role" value="Student" data-type="student" required><span>Student</span></label>
+              <label class="cf-chip"><input type="radio" name="role" value="Educator" data-type="educator"><span>Educator</span></label>
+              <label class="cf-chip"><input type="radio" name="role" value="Musician / producer" data-type="producer"><span>Musician / producer</span></label>
+              <label class="cf-chip"><input type="radio" name="role" value="Researcher / scientist" data-type="researcher"><span>Researcher / scientist</span></label>
+              <label class="cf-chip"><input type="radio" name="role" value="Company or agency" data-type="company"><span>Company or agency</span></label>
+              <label class="cf-chip"><input type="radio" name="role" value="Just curious" data-type="curious"><span>Just curious</span></label>
             </div>
-            <label class="cf-field cf-other" hidden>
-              <span class="cf-label">Tell me more <b>*</b></span>
-              <input type="text" name="roleOther" autocomplete="off">
-            </label>
+          </fieldset>
+
+          <fieldset class="cf-group">
+            <legend class="cf-label">I'm interested in... <span class="cf-hint">select all that apply</span></legend>
+            <div class="cf-chips">
+              <label class="cf-chip"><input type="checkbox" name="services" value="1-on-1 mentorship" data-type="mentorship"><span>1-on-1 mentorship</span></label>
+              <label class="cf-chip"><input type="checkbox" name="services" value="Workshop or school visit" data-type="workshop"><span>Workshop or school visit</span></label>
+              <label class="cf-chip"><input type="checkbox" name="services" value="Talk or presentation" data-type="talk"><span>Talk or presentation</span></label>
+              <label class="cf-chip"><input type="checkbox" name="services" value="Custom sound or commission" data-type="commission"><span>Custom sound or commission</span></label>
+              <label class="cf-chip"><input type="checkbox" name="services" value="Research collaboration" data-type="research"><span>Research collaboration</span></label>
+              <label class="cf-chip"><input type="checkbox" name="services" value="Not sure yet" data-type="unsure"><span>Not sure yet</span></label>
+            </div>
           </fieldset>
 
           <fieldset class="cf-group">
@@ -360,12 +369,12 @@
 
   <!-- Page order + links. Classic script: runs before the modules below, so
        the DOM is in its final order before visuals/audio initialize. -->
-  <script src="js/pages.js?v=7"></script>
+  <script src="js/pages.js?v=8"></script>
   <script src="js/rays.js?v=9"></script>
   <script type="module" src="js/audio.js?v=10"></script>
   <script type="module" src="js/visuals.js?v=36"></script>
   <script type="module" src="js/main.js?v=42"></script>
-  <script src="js/contact-form.js?v=2"></script>
+  <script src="js/contact-form.js?v=3"></script>
   <script type="module" src="js/sonify.js?v=5"></script>
 </body>
 </html>

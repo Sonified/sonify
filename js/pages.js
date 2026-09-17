@@ -41,8 +41,9 @@ window.SONIFY = {
     entries: {
       name:          'entry.1406118423',
       email:         'entry.1404109041',
-      role:          'entry.1804815478',
-      interests:     'entry.1609566717',
+      role:          'entry.1804815478', // I am a...
+      services:      'entry.1296234172', // I'm interested in...
+      interests:     'entry.1609566717', // data curiosity
       message:       'entry.135140102',
     },
     // Optional fallback: a Formspree endpoint (https://formspree.io/f/xxxx). When set, it is used instead.

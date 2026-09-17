@@ -1,7 +1,7 @@
 /* ============================================================
    Inline contact form (Work with Robert page)
-   - "Other" role: reveals and requires a short text field.
-   - ?type=student|educator|corporate|researcher|other pre-selects the role.
+   - ?type=student|educator|producer|researcher|company|curious pre-selects "I am a...";
+     ?interest=mentorship|workshop|talk|commission|research pre-checks "I'm interested in...".
    - Submits to the Google Form's formResponse endpoint (no redirect),
      or to Formspree when SONIFY.FORM.formspree is set.
    Config: window.SONIFY.FORM in js/pages.js
@@ -16,27 +16,27 @@
   const success = form.parentElement.querySelector('.cf-success');
   const status = form.querySelector('.cf-status');
   const submitBtn = form.querySelector('.cf-submit');
-  const roleOther = form.querySelector('.cf-other');
   const interestOther = form.querySelector('.cf-interest-other');
 
   // ----- conditional fields -----
   function syncConditionals() {
-    const other = form.querySelector('input[name="role"]:checked')?.dataset.type === 'other';
-    roleOther.hidden = !other;
-    el.roleOther.required = other;
-    if (!other) clearError(el.roleOther);
-
     const intOther = form.querySelector('input[name="interests"][value="__other_option__"]').checked;
     interestOther.hidden = !intOther;
   }
   form.addEventListener('change', syncConditionals);
 
   // ----- deep link: ?type=student etc. -----
-  const type = new URLSearchParams(location.search).get('type');
+  const qs = new URLSearchParams(location.search);
+  const TYPE_ALIASES = { corporate: 'company', agency: 'company', musician: 'producer', scientist: 'researcher', other: 'curious' };
+  const type = (qs.get('type') || '').toLowerCase();
   if (type) {
-    const r = form.querySelector(`input[name="role"][data-type="${CSS.escape(type.toLowerCase())}"]`);
+    const r = form.querySelector(`input[name="role"][data-type="${CSS.escape(TYPE_ALIASES[type] || type)}"]`);
     if (r) r.checked = true;
   }
+  (qs.get('interest') || '').toLowerCase().split(',').filter(Boolean).forEach(t => {
+    const c = form.querySelector(`input[name="services"][data-type="${CSS.escape(t.trim())}"]`);
+    if (c) c.checked = true;
+  });
   syncConditionals();
 
   // ----- validation -----
@@ -70,11 +70,12 @@
     const f = el;
     const role = form.querySelector('input[name="role"]:checked');
     const interests = Array.from(form.querySelectorAll('input[name="interests"]:checked')).map(i => i.value);
+    const services = Array.from(form.querySelectorAll('input[name="services"]:checked')).map(i => i.value);
     return {
       name: f.name.value.trim(),
       email: f.email.value.trim(),
       role: role ? role.value : '',
-      roleOther: f.roleOther.value.trim(),
+      services,
       interests,
       interestsOther: f.interestsOther.value.trim(),
       message: f.message.value.trim(),
@@ -87,7 +88,7 @@
     b.append(e.name, d.name);
     b.append(e.email, d.email);
     b.append(e.role, d.role);
-    if (d.role === '__other_option__') b.append(e.role + '.other_option_response', d.roleOther);
+    d.services.forEach(v => b.append(e.services, v));
     d.interests.forEach(v => b.append(e.interests, v));
     if (d.interests.includes('__other_option__')) b.append(e.interests + '.other_option_response', d.interestsOther || 'Other');
     if (d.message) b.append(e.message, d.message);
@@ -96,9 +97,8 @@
   }
 
   function readable(d) {
-    const role = d.role === '__other_option__' ? `Other: ${d.roleOther}` : d.role;
     const ints = d.interests.map(v => v === '__other_option__' ? `Other: ${d.interestsOther}` : v).join(', ');
-    return { role, interests: ints };
+    return { role: d.role, services: d.services.join(', '), interests: ints };
   }
 
   async function send(d) {
@@ -109,7 +109,7 @@
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({
           name: d.name, email: d.email,
-          role: r.role, interests: r.interests, message: d.message,
+          role: r.role, services: r.services, interests: r.interests, message: d.message,
         }),
       });
       if (!res.ok) throw new Error('formspree ' + res.status);
@@ -123,7 +123,7 @@
     const r = readable(d);
     const lines = [
       `Name: ${d.name}`, `Email: ${d.email}`,
-      `Describes me: ${r.role}`, r.interests ? `Curious about: ${r.interests}` : '',
+      `I am a: ${r.role}`, r.services ? `Interested in: ${r.services}` : '', r.interests ? `Curious about: ${r.interests}` : '',
       d.message ? `\n${d.message}` : '',
     ].filter(Boolean).join('\n');
     return `mailto:${cfg.email}?subject=${encodeURIComponent('Sound Science: Work with Robert')}&body=${encodeURIComponent(lines)}`;
