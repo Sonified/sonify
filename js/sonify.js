@@ -291,8 +291,6 @@
       }));
     }
     window.addEventListener('scroll', () => { if (!resizing) capture(); }, { passive: true });
-    window.addEventListener('resize', updateFreeScroll);
-    if (window.ResizeObserver) new ResizeObserver(updateFreeScroll).observe(document.getElementById('pages') || document.body);
     window.addEventListener('resize', () => {
       if (!resizing) { resizing = true; root.style.scrollSnapType = 'none'; }
       restore();
@@ -300,6 +298,69 @@
       settleTimer = setTimeout(() => { resizing = false; restore(); }, 180);
     });
     capture();
+  })();
+
+  // ===== 3e. Shareable page links (#soundscience, #listen, #experience, #music, #play, #connect) =====
+  (function pageLinks() {
+    const slugs = (window.SONIFY && window.SONIFY.SLUGS) || {};
+    const root = document.documentElement;
+    const pages = Array.from(document.querySelectorAll('#pages > section[data-page]'));
+    const slugOf = sec => slugs[sec.dataset.page] || sec.dataset.page;
+    const bySlug = new Map(pages.map(sec => [slugOf(sec), sec]));
+
+    function jumpTo(slug) {
+      const sec = bySlug.get(slug);
+      if (!sec) return false;
+      const prevSnap = root.style.scrollSnapType, prevBehavior = root.style.scrollBehavior;
+      root.style.scrollSnapType = 'none';
+      root.style.scrollBehavior = 'auto';
+      window.scrollTo(0, sec.offsetTop);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        window.scrollTo(0, sec.offsetTop); // again, after late layout (fonts, canvases)
+        root.style.scrollSnapType = prevSnap;
+        root.style.scrollBehavior = prevBehavior;
+      }));
+      return true;
+    }
+
+    // Arriving with a page tag: go there (and don't let the browser restore an old scroll spot).
+    const initial = decodeURIComponent(location.hash.slice(1));
+    if (initial && bySlug.has(initial)) {
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+      jumpTo(initial);
+      window.addEventListener('load', () => jumpTo(initial), { once: true });
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (location.hash.slice(1) === initial) jumpTo(initial); });
+    }
+
+    // Keep the address bar in sync with the page in view (replaceState: no back-button clutter).
+    let current = initial && bySlug.has(initial) ? initial : null;
+    function sync() {
+      const mid = window.innerHeight / 2;
+      let active = null;
+      for (const sec of pages) {
+        const r = sec.getBoundingClientRect();
+        if (r.top <= mid && r.bottom > mid) { active = sec; break; }
+      }
+      if (!active) return;
+      const slug = slugOf(active);
+      if (slug === current) return;
+      // Leave a clean URL on first landing at the top; add tags once the visitor moves.
+      if (current === null && active === pages[0]) { current = slug; return; }
+      current = slug;
+      history.replaceState(history.state, '', location.pathname + location.search + '#' + slug);
+    }
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => { ticking = false; sync(); });
+    }, { passive: true });
+
+    // Typing a tag into the address bar, or clicking a plain #link, jumps there too.
+    window.addEventListener('hashchange', () => {
+      const slug = decodeURIComponent(location.hash.slice(1));
+      if (bySlug.has(slug)) { current = slug; jumpTo(slug); }
+    });
   })();
 
   // ===== 4. Hero scroll cue on load =====
