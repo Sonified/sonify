@@ -136,8 +136,18 @@
     (node.closest('.cf-field') || node.closest('.cf-group') || node).classList.remove('cf-invalid');
   }
   // The email field manages its own error state (message + border) in checkEmail().
-  form.addEventListener('input', e => { if (e.target !== el.email) clearError(e.target); });
-  form.addEventListener('change', e => { if (e.target !== el.email) clearError(e.target); });
+  // Once every highlighted field is corrected, the red submit message resets too
+  // (checked a tick later, after all handlers have updated their own state).
+  function maybeClearStatus() {
+    setTimeout(() => {
+      if (status.classList.contains('is-error') && !form.querySelector('.cf-invalid')) {
+        status.textContent = '';
+        status.classList.remove('is-error');
+      }
+    }, 0);
+  }
+  form.addEventListener('input', e => { if (e.target !== el.email) clearError(e.target); maybeClearStatus(); });
+  form.addEventListener('change', e => { if (e.target !== el.email) clearError(e.target); maybeClearStatus(); });
 
   function validate() {
     let firstBad = null;
@@ -239,6 +249,7 @@
     submitBtn.textContent = 'Sending…';
     try {
       await send(data);
+      try { localStorage.removeItem('sonify_cf_draft'); } catch (e2) {}
       form.hidden = true;
       success.hidden = false;
       success.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -252,4 +263,69 @@
       sending = false;
     }
   });
+  // ----- draft: progress survives a reload, in this browser only -----
+  // Every edit is saved (debounced); reopening restores the fields and, when
+  // the page loads back onto Connect, the exact scroll position. A successful
+  // send clears it.
+  const DRAFT_KEY = 'sonify_cf_draft';
+  const textFields = () => form.querySelectorAll('input[type="text"], input[type="email"], textarea');
+  let draftTimer = 0;
+  function saveDraft() {
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(() => {
+      try {
+        const d = { text: {}, checks: [], y: Math.round(window.scrollY), t: Date.now() };
+        textFields().forEach((i, n) => { if (i.value.trim()) d.text[i.name || 'f' + n] = i.value; });
+        form.querySelectorAll('input[type="radio"]:checked, input[type="checkbox"]:checked')
+          .forEach(i => d.checks.push(i.name + '\u0000' + i.value));
+        if (!Object.keys(d.text).length && !d.checks.length) localStorage.removeItem(DRAFT_KEY);
+        else localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
+      } catch (e) {}
+    }, 300);
+  }
+  form.addEventListener('input', saveDraft);
+  form.addEventListener('change', saveDraft);
+
+  // While a draft exists, remember where on the page they are.
+  let yTimer = 0;
+  window.addEventListener('scroll', () => {
+    if (yTimer) return;
+    yTimer = setTimeout(() => {
+      yTimer = 0;
+      try {
+        const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null');
+        if (d) { d.y = Math.round(window.scrollY); localStorage.setItem(DRAFT_KEY, JSON.stringify(d)); }
+      } catch (e) {}
+    }, 400);
+  }, { passive: true });
+
+  (function restoreDraft() {
+    let d = null;
+    try { d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch (e) {}
+    if (!d) return;
+    try {
+      textFields().forEach((i, n) => {
+        const k = i.name || 'f' + n;
+        if (d.text && d.text[k] != null && !i.value) i.value = d.text[k];
+      });
+      (d.checks || []).forEach(kv => {
+        const parts = kv.split('\u0000');
+        const box = form.querySelector(`input[name="${CSS.escape(parts[0])}"][value="${CSS.escape(parts[1])}"]`);
+        if (box) box.checked = true;
+      });
+      syncConditionals();
+      if (el.message && el.message.value) el.message.dispatchEvent(new Event('input'));  // regrow the box
+      // Land them right where they were, once the page's own jump has settled.
+      if (d.y > 200 && /connect/.test(location.hash)) {
+        const apply = () => {
+          const root = document.documentElement;
+          root.style.scrollSnapType = 'none';
+          window.scrollTo(0, d.y);
+          requestAnimationFrame(() => requestAnimationFrame(() => { root.style.scrollSnapType = ''; }));
+        };
+        if (document.readyState === 'complete') setTimeout(apply, 250);
+        else window.addEventListener('load', () => setTimeout(apply, 250), { once: true });
+      }
+    } catch (e) {}
+  })();
 })();
