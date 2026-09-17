@@ -1378,3 +1378,15 @@ html:not(.is-mobile) #contact .wwr-content { transform: translateY(-5px); }
 
 /* Phones: less air between the Meditate sun and the Work with Robert page */
 .is-mobile .meditate-card { margin-bottom: 3rem; }
+
+/* Phones: Listen to Space fills a full screen — its content centered, so the
+   hero particles above and Sound as Experience below stay off-screen while
+   you're on it. (Padding alone could never do this: the section's natural
+   height was shorter than the viewport.) */
+.is-mobile #education {
+  min-height: 118svh !important;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}

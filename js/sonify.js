@@ -58,7 +58,11 @@ import { getStemAnalyser, setStemFilter, setStemSpace, setStemTempoBend, setStem
       if (el.querySelector('iframe')) return;
       if (autoplay) pauseSeqIfPlaying();   // desktop facade click starts the video at once
       const iframe = document.createElement('iframe');
-      iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=${autoplay ? 1 : 0}&rel=0&modestbranding=1&playsinline=1`;
+      iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=${autoplay ? 1 : 0}&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`;
+      // No white flash: the thumbnail stays visible until the player has painted.
+      iframe.style.opacity = '0';
+      iframe.style.transition = 'opacity 0.35s ease';
+      iframe.addEventListener('load', () => { iframe.style.opacity = '1'; }, { once: true });
       iframe.title = title;
       iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
       iframe.allowFullscreen = true;
@@ -78,8 +82,13 @@ import { getStemAnalyser, setStemFilter, setStemSpace, setStemTempoBend, setStem
       // the real player loads when its page scrolls into view, so one tap on
       // YouTube's own button starts it. Scrolling away still tears it down.
       const io = new IntersectionObserver(([en]) => {
-        if (en.isIntersecting) activate(false);
-        else deactivate();
+        if (en.isIntersecting) { activate(false); return; }
+        // Keep the player alive (tearing it down meant a white reload every
+        // return trip) — just pause it so audio never bleeds between pages.
+        const f = el.querySelector('iframe');
+        if (f && f.contentWindow) {
+          try { f.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*'); } catch (e) {}
+        }
       }, { threshold: 0.2 });
       io.observe(el.closest('.section') || el);
     } else {
