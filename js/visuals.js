@@ -6224,6 +6224,7 @@ function initCSCanvas() {
   const CS_SPEED_MULT_MAX = 52; // louder moments should rip much faster
   const CS_FREQ_MULT = 1.75; // stable higher-frequency waveform shape
   const vis = trackVisibility('citizen-science');
+  const CS_ORBS = !document.documentElement.classList.contains('is-mobile');
 
   // Living discovery orbs — drift, fade in/out, respawn
   const MAX_ORBS = 6;
@@ -6305,8 +6306,8 @@ function initCSCanvas() {
     }
     c.stroke();
 
-    // Discovery orbs — drift, pulse, fade in/out
-    for (let i = 0; i < discoveries.length; i++) {
+    // Discovery orbs — drift, pulse, fade in/out (desktop only)
+    for (let i = 0; i < (CS_ORBS ? discoveries.length : 0); i++) {
       const d = discoveries[i];
       d.age++;
       d.x += d.vx;
