@@ -13,6 +13,18 @@ import { getStemAnalyser, setStemFilter, setStemSpace, setStemTempoBend, setStem
   'use strict';
 
   // ===== 1. YouTube facades =====
+  // A video starting means the beat yields the stage.
+  function pauseSeqIfPlaying() {
+    const play = document.getElementById('seq-play');
+    if (play && play.classList.contains('clicked')) play.click();   // 'clicked' = playing (main.js)
+  }
+  // Catches taps on YouTube's own play button (cross-origin iframe): focus
+  // leaves the page and lands on the player's iframe.
+  window.addEventListener('blur', () => {
+    const a = document.activeElement;
+    if (a && a.tagName === 'IFRAME' && a.closest('.yt')) pauseSeqIfPlaying();
+  });
+
   function buildFacade(el) {
     const id = el.dataset.yt;
     if (!id) return;
@@ -44,6 +56,7 @@ import { getStemAnalyser, setStemFilter, setStemSpace, setStemTempoBend, setStem
 
     function activate(autoplay = true) {
       if (el.querySelector('iframe')) return;
+      if (autoplay) pauseSeqIfPlaying();   // desktop facade click starts the video at once
       const iframe = document.createElement('iframe');
       iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=${autoplay ? 1 : 0}&rel=0&modestbranding=1&playsinline=1`;
       iframe.title = title;

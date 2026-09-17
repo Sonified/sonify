@@ -1355,3 +1355,20 @@ html:not(.is-mobile) #contact .wwr-content { transform: translateY(-5px); }
 
 /* Row labels right-align against the grid (degree numbers line up with HAT/KCK) */
 .seq-label { justify-content: flex-end; }
+
+/* Phones: golden hour title centered; 20% more air above and below the Listen to Space video */
+.is-mobile #citizen-science .pg-title { text-align: center; align-self: center; }
+.is-mobile #education .pg-content { gap: 2.1rem; }          /* was 1.75 */
+.is-mobile #education { padding-bottom: 8.75rem; }          /* was 7.29 */
+
+/* Phones: the Solar Sequencer title chips tighten up so tempo fits on the line */
+.is-mobile .seq-octave { margin-left: 0.22rem; font-size: 0.53em; padding: 0.08rem 0.28rem; }
+.is-mobile .seq-tempo { margin-left: 0.22rem; }
+.is-mobile .seq-mode { width: 12ch; }
+.is-mobile .seq-bpm-num { width: 4.5ch; }
+.is-mobile .seq-bpm-btn { width: 2.4ch; }
+
+/* Phones: Meditate joins the instrument stack — no 'Breathe' label on top, and
+   the sun sits the same 1.25rem gap below Solar Synth as between the cards */
+.is-mobile .meditate-card::before { content: none; }
+.is-mobile .meditate-card { margin-top: 0; }
