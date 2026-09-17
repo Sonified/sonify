@@ -10,6 +10,16 @@ function newId(n = 8) {
   return Array.from(bytes, b => ID_CHARS[b % ID_CHARS.length]).join('');
 }
 
+// Readable share slugs, tiered: adjective-sunword-musicnoun (40x40x40 = 64k) is
+// the base; only when a candidate collides does the wow tier flip on as a suffix
+// (blazing-solar-groove-yesss), multiplying the space to 1.28M.
+const WOWS = ['wow', 'woww', 'whoa', 'whoaa', 'wooah', 'omg', 'omgg', 'yes', 'yess', 'yesss', 'yessss', 'wowza', 'yay', 'ooh', 'oooh', 'aha', 'dang', 'hey', 'mmm', 'fire'];
+const ADJS = ['blazing', 'golden', 'radiant', 'molten', 'cosmic', 'luminous', 'roaring', 'burning', 'glowing', 'shimmering', 'flaming', 'searing', 'gleaming', 'dazzling', 'scorching', 'soaring', 'swirling', 'thundering', 'electric', 'magnetic', 'stellar', 'wild', 'epic', 'mighty', 'fierce', 'brilliant', 'booming', 'pulsing', 'raging', 'vivid', 'sizzling', 'sparkling', 'glittering', 'thunderous', 'volcanic', 'hypnotic', 'celestial', 'incandescent', 'kinetic', 'blistering'];
+const SUNS = ['solar', 'sun', 'corona', 'flare', 'plasma', 'photon', 'fusion', 'helio', 'sunspot', 'aurora', 'sunburst', 'sunrise', 'sunset', 'zenith', 'equinox', 'eclipse', 'radiance', 'daylight', 'starlight', 'supernova', 'magnetosphere', 'heliosphere', 'prominence', 'chromosphere', 'photosphere', 'filament', 'solstice', 'sunbeam', 'starshine', 'lightyear', 'cosmos', 'nebula', 'quasar', 'pulsar', 'comet', 'nova', 'orbit', 'gravity', 'magnetometer', 'granule'];
+const BEATS = ['groove', 'beat', 'riff', 'pulse', 'rhythm', 'banger', 'jam', 'drop', 'anthem', 'bop', 'loop', 'track', 'tune', 'melody', 'remix', 'sequence', 'symphony', 'song', 'shuffle', 'cadence', 'tempo', 'harmony', 'chorus', 'hook', 'breakbeat', 'backbeat', 'bassline', 'crescendo', 'encore', 'refrain', 'serenade', 'sonata', 'overture', 'rhapsody', 'medley', 'mixtape', 'ballad', 'jingle', 'downbeat', 'upbeat'];
+
+const pickWord = list => list[crypto.getRandomValues(new Uint32Array(1))[0] % list.length];
+
 const bool = v => v === true;
 // The sequencer's exact schema: 16 steps, 5 melody rows, 5 pitches, melodyFreqs
 // derived from rows+pitches. Whatever arrives is normalized into that shape, so
@@ -60,7 +70,18 @@ export async function onRequestPost({ request, env }) {
   const record = JSON.stringify({ ...state, frame });
   if (record.length > MAX_STATE_BYTES) return json({ error: 'state too large' }, 413);
 
-  const id = newId();
+  // Tier 1: three words. Tier 2 (only if the namespace pushes back): -wow suffix.
+  // Last resort: a short random id, which can never collide in practice.
+  let id = null;
+  for (let i = 0; i < 4 && !id; i++) {
+    const cand = `${pickWord(ADJS)}-${pickWord(SUNS)}-${pickWord(BEATS)}`;
+    if (!(await env.BEATS.head(`beats/${cand}.json`))) id = cand;
+  }
+  for (let i = 0; i < 4 && !id; i++) {
+    const cand = `${pickWord(ADJS)}-${pickWord(SUNS)}-${pickWord(BEATS)}-${pickWord(WOWS)}`;
+    if (!(await env.BEATS.head(`beats/${cand}.json`))) id = cand;
+  }
+  if (!id) id = newId();
   await env.BEATS.put(`beats/${id}.json`, record, { httpMetadata: { contentType: 'application/json' } });
 
   const origin = new URL(request.url).origin;

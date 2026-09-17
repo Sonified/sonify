@@ -4,7 +4,7 @@ const DESC = 'Sound Science: play NASA data at sonify.now.audio';
 
 export async function onRequestGet({ request, params, env }) {
   const id = String(params.id || '');
-  if (!/^[a-z0-9]{6,16}$/.test(id) || !env.BEATS) return env.ASSETS.fetch(new URL('/', request.url));
+  if (!/^[a-z0-9]([a-z0-9-]{1,62}[a-z0-9])?$/.test(id) || !env.BEATS) return env.ASSETS.fetch(new URL('/', request.url));
   const obj = await env.BEATS.get(`beats/${id}.json`);
   if (!obj) return env.ASSETS.fetch(new URL('/', request.url));
   const state = await obj.json();
