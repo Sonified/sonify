@@ -768,3 +768,21 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 .is-mobile .meditate-card .sun-breath { width: 170px; height: 170px; }
 .is-mobile .meditate-card h3 { font-size: 1.9rem; font-weight: 300; padding: 1.5rem 0 0.6rem; line-height: 1.1; }
 .is-mobile .meditate-card p { font-size: 1.02rem; line-height: 1.6; padding: 0 0.5rem 0.5rem; color: var(--text-dim); }
+
+/* ----- Phone hero: caption on one line; chevron just under the yellow ring ----- */
+.is-mobile .scroll-hint-text { white-space: nowrap; }
+.ring-chevron {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(min(var(--ring-bottom, 72svh), 100svh - 3.5rem) + 0.4rem);
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 2.8s ease;
+}
+.ring-chevron.is-shown { opacity: 1; }
+.ring-chevron .section-down-chevron { display: block; color: rgba(228, 188, 88, 0.96); }
+.ring-chevron.is-pulsing .section-down-chevron { animation: hintPulse 1.7s ease-in-out infinite; }

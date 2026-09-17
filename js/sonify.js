@@ -219,6 +219,28 @@
 
   initSolarFlow();
 
+  // ===== 3b. Phone chevron pinned under the yellow ring =====
+  // Mirrors the hero hint's timing (show-chevron / pulsing / dismissed) but sits at
+  // --ring-bottom, which visuals.js publishes on the hero section.
+  (function phoneRingChevron() {
+    if (!document.documentElement.classList.contains('is-mobile')) return;
+    const hero = document.querySelector('section[data-page="hero"]');
+    const hint = hero && hero.querySelector('.scroll-hint');
+    if (!hint) return;
+    const chev = document.createElement('div');
+    chev.className = 'ring-chevron';
+    chev.setAttribute('aria-hidden', 'true');
+    chev.innerHTML = '<span class="section-down-chevron">&#8964;</span>';
+    hero.appendChild(chev);
+    const sync = () => {
+      const dismissed = hint.dataset.dismissed === '1' || hint.style.opacity === '0';
+      chev.classList.toggle('is-shown', hint.classList.contains('show-chevron') && !dismissed);
+      chev.classList.toggle('is-pulsing', hint.classList.contains('pulsing') && !dismissed);
+    };
+    new MutationObserver(sync).observe(hint, { attributes: true, attributeFilter: ['class', 'style', 'data-dismissed'] });
+    sync();
+  })();
+
   // ===== 4. Hero scroll cue on load =====
   // Sonara only reveals the chevron after a Listen click (and then ~10s later).
   // A first-time viewer needs the "scroll down" cue without doing anything, so
