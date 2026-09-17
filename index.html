@@ -27,9 +27,23 @@
       checkMobile();
       window.addEventListener('resize', checkMobile);
     })();
+    // Arriving on a page tag (#connect etc.): stay hidden until js/pages.js has scrolled
+    // there, so the title page never paints first. Safety net reveals regardless.
+    (function(){
+      var tag = location.hash.slice(1);
+      if (!tag || tag === 'soundscience') return;
+      var root = document.documentElement;
+      root.classList.add('deep-linking');
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+      setTimeout(function(){ root.classList.remove('deep-linking'); }, 2000);
+    })();
   </script>
+  <style>
+    html.deep-linking body { opacity: 0; }
+    html.deep-landed body { transition: opacity 0.35s ease; }
+  </style>
   <link rel="stylesheet" href="styles.css?v=1">
-  <link rel="stylesheet" href="sonify.css?v=77">
+  <link rel="stylesheet" href="sonify.css?v=78">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -262,10 +276,11 @@
               <img src="logos/cannes.svg" alt="Festival de Cannes" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
               <span class="wordmark wordmark-serif" hidden>Festival de Cannes</span>
             </div>
-            <div class="wwr-logo">
+            <a class="wwr-logo wwr-logo-link" href="https://breathscape.com" target="_blank" rel="noopener" aria-label="Breathscape: generate solar music with your breath">
               <img src="logos/breathscape.jpg" alt="Breathscape" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
               <span class="wordmark" hidden>Breathscape</span>
-            </div>
+              <span class="logo-tip">Generate solar music with your breath</span>
+            </a>
           </div>
         </div>
       </div>
@@ -372,13 +387,13 @@
 
   <!-- Page order + links. Classic script: runs before the modules below, so
        the DOM is in its final order before visuals/audio initialize. -->
-  <script src="js/pages.js?v=10"></script>
+  <script src="js/pages.js?v=12"></script>
   <script src="js/rays.js?v=9"></script>
   <script type="module" src="js/audio.js?v=10"></script>
   <script type="module" src="js/visuals.js?v=38"></script>
   <script type="module" src="js/main.js?v=44"></script>
   <script src="js/contact-form.js?v=10"></script>
-  <script src="js/share.js?v=1"></script>
-  <script type="module" src="js/sonify.js?v=23"></script>
+  <script src="js/share.js?v=2"></script>
+  <script type="module" src="js/sonify.js?v=24"></script>
 </body>
 </html>

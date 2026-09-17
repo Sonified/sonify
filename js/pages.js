@@ -138,6 +138,34 @@ window.SONIFY = {
     if (stars && home) home.insertBefore(stars, home.firstChild);
   }
 
+  // ----- 1c. Deep links: land on the tagged page before it's ever shown -----
+  // index.html's <head> hides the page (html.deep-linking) when a tag is present; we scroll
+  // there, then fade in. js/sonify.js also jumps later (through late layout), but it's a
+  // module that waits behind visuals.js, far too late to be the first move.
+  const root = document.documentElement;
+  const slug = decodeURIComponent(location.hash.slice(1));
+  const target = slug && finalPages.find(s => (cfg.SLUGS[s.dataset.page] || s.dataset.page) === slug);
+  const reveal = () => {
+    if (!root.classList.contains('deep-linking')) return;
+    root.classList.add('deep-landed');
+    root.classList.remove('deep-linking');
+    setTimeout(() => root.classList.remove('deep-landed'), 400);
+  };
+  if (target && target !== finalPages[0]) {
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    root.style.scrollSnapType = 'none';
+    root.style.scrollBehavior = 'auto';
+    window.scrollTo(0, target.offsetTop);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      window.scrollTo(0, target.offsetTop);
+      root.style.scrollSnapType = '';
+      root.style.scrollBehavior = '';
+      reveal();
+    }));
+  } else {
+    reveal(); // unknown tag or the title page: nothing to wait for
+  }
+
   // ----- 2. Links -----
   document.querySelectorAll('[data-link]').forEach(el => {
     const key = el.dataset.link;

@@ -1227,3 +1227,28 @@ html:not(.is-mobile) #citizen-science .pg-split .pg-right .yt { max-width: calc(
   white-space: nowrap;
 }
 .seq-share-toast.is-shown { opacity: 1; }
+
+/* Breathscape is the one logo tile that IS a control: it links out.
+   Gold hover comes back for it, and an instant tooltip names the product. */
+.wwr-logo-link { position: relative; text-decoration: none; }
+.wwr-logo-link, .wwr-logo-link:hover { cursor: pointer; }
+.wwr-logo-link:hover { border-color: rgba(212, 168, 67, 0.4); background: rgba(20, 20, 28, 0.9); }
+.wwr-logo-link:hover img { opacity: 1; }
+.logo-tip {
+  position: absolute;
+  right: -4px;
+  bottom: calc(100% + 9px);
+  padding: 0.35rem 0.7rem;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: #e8d9a8;
+  background: rgba(12, 12, 16, 0.95);
+  border: 1px solid rgba(212, 168, 67, 0.35);
+  border-radius: 8px;
+  opacity: 0;               /* instant: no transition, it just appears */
+  pointer-events: none;
+  z-index: 5;
+}
+.wwr-logo-link:hover .logo-tip,
+.wwr-logo-link:focus-visible .logo-tip { opacity: 1; }
