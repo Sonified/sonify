@@ -165,6 +165,7 @@ window.SONIFY = {
   } else {
     reveal(); // unknown tag or the title page: nothing to wait for
   }
+  window.__perf?.('pages.js: layout + deep-link jump');
 
   // ----- 2. Links -----
   document.querySelectorAll('[data-link]').forEach(el => {

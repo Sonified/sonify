@@ -4,7 +4,7 @@
  */
 
 import { play, stop, killNow, seqRestart, seqSilence, getEndTime, now as audioNow, getStemPattern, generateStemPattern, setStemPattern, setSeqLoop, getSeqLoop, setSeqDelay, getSeqDelay, setSeqReverb, getSeqReverb, getHeroAnalyser, getHeroProgress, setOnAudioDeviceLost, setOnAudioDeviceRecovered } from './audio.js?v=10';
-import { initVisuals, onVisualsPause, onVisualsResume, onVisualsThrottle } from './visuals.js?v=38';
+import { initVisuals, onVisualsPause, onVisualsResume, onVisualsThrottle } from './visuals.js?v=39';
 
 (function() {
   'use strict';
@@ -953,8 +953,42 @@ import { initVisuals, onVisualsPause, onVisualsResume, onVisualsThrottle } from 
     return null;
   }
 
-  // Restore saved pattern or generate fresh on first visit
-  let currentDisplayPattern = loadPattern() || generateStemPattern();
+  // A saved pattern can come from an old version of the site, another tab, or a
+  // shared beat link — never trust its shape. Whatever arrives is repaired into
+  // the exact schema the grid needs (16 steps, 5 melody rows, 5 pitches,
+  // melodyFreqs rederived), so loading a beat can never break the page.
+  function sanitizePattern(p) {
+    const base = generateStemPattern();
+    if (!p || typeof p !== 'object') return base;
+    const cells = (row, fallback) => {
+      if (!Array.isArray(row)) return fallback.slice();
+      const out = new Array(16).fill(0);
+      for (let i = 0; i < 16; i++) out[i] = row[i] ? 1 : 0;
+      return out;
+    };
+    const kick = cells(p.kick, base.kick);
+    const hat = cells(p.hat, base.hat);
+    const pitches = Array.isArray(p.pitches) && p.pitches.length === 5 && p.pitches.every(f => Number.isFinite(+f) && +f > 0)
+      ? p.pitches.map(Number)
+      : base.pitches;
+    const rows = Array.isArray(p.melodyRows) ? p.melodyRows : [];
+    const zero = new Array(16).fill(0);
+    const melodyRows = Array.from({ length: 5 }, (_, r) => cells(rows[r], zero));
+    const melodyFreqs = Array.from({ length: 16 }, (_, s) => {
+      const on = [];
+      for (let r = 0; r < 5; r++) if (melodyRows[r][s]) on.push(pitches[r]);
+      return on;
+    });
+    const bpm = Number.isFinite(+p.bpm) ? Math.min(240, Math.max(40, +p.bpm)) : base.bpm;
+    return {
+      kick, hat, melodyRows, melodyFreqs, pitches,
+      waveType: typeof p.waveType === 'string' && p.waveType ? p.waveType.slice(0, 16) : base.waveType,
+      bpm, step: 60 / bpm / 2, steps: 16,
+    };
+  }
+
+  // Restore saved pattern (repaired) or generate fresh on first visit
+  let currentDisplayPattern = sanitizePattern(loadPattern());
   setStemPattern(currentDisplayPattern);
   buildGrid(currentDisplayPattern);
   savePattern();

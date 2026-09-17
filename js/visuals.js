@@ -3772,6 +3772,7 @@ fn fs(in: VSOut) -> @location(0) vec4f {
   async function initWebGPU() {
     if (!navigator.gpu) return;
     try {
+      window.__perf?.('WebGPU init start');
       const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
       if (!adapter) return;
       const hasF16 = adapter.features.has('shader-f16') && localStorage.getItem('sonara_f16') !== '0';
@@ -3987,8 +3988,10 @@ fn fs(in: VSOut) -> @location(0) vec4f {
       gpuCanvasFormat = canvasFormat;
 
       console.log('WebGPU compute + render pipelines ready');
+      window.__perf?.('WebGPU pipelines created');
       // Hot-swap: re-run init() now that gpuDevice is available
       if (w && h) init();
+      window.__perf?.('hero particles init()');
     } catch (e) {
       console.warn('WebGPU init failed, staying on CPU:', e);
     }
@@ -5096,6 +5099,7 @@ fn fs(in: VSOut) -> @location(0) vec4f {
         }
 
         gpuDevice.queue.submit([commandEncoder.finish()]);
+        perfFirstGpuFrame(gpuDevice);
 
         // Async flags readback for slot recycling + line count
         if (!gpuReadbackPending) {
@@ -5139,6 +5143,7 @@ fn fs(in: VSOut) -> @location(0) vec4f {
           commandEncoder.copyBufferToBuffer(gpuOutputBuf, 0, gpuOutputReadBuf, 0, readbackBytes);
         }
         gpuDevice.queue.submit([commandEncoder.finish()]);
+        perfFirstGpuFrame(gpuDevice);
 
         // Start async readback for NEXT frame (skip if previous still pending)
         if (!gpuReadbackPending) {
@@ -7158,7 +7163,18 @@ function initGlobeCanvas() {
 }
 
 // Init all
+// Load profiler (?perf): the first GPU frame's submit, and when the GPU actually finishes it
+// (that wait includes compiling the shaders, which happens lazily on first use).
+let perfGpuFrameSeen = false;
+function perfFirstGpuFrame(device) {
+  if (perfGpuFrameSeen || !window.__perf) return;
+  perfGpuFrameSeen = true;
+  window.__perf('GPU first frame submitted');
+  device.queue.onSubmittedWorkDone().then(() => window.__perf('GPU first frame done'));
+}
+
 export function initVisuals() {
+  window.__perf?.('visuals.js running (all modules loaded)');
   initHeroCanvas();
   initVisionCanvas();
   initCSCanvas();
@@ -7167,5 +7183,7 @@ export function initVisuals() {
   initSpectrumCanvas();
   initGlobeCanvas();
   rafId = requestAnimationFrame(rafLoop);
+  window.__perf?.('initVisuals done');
+  requestAnimationFrame(() => window.__perf?.('first animation frame'));
 }
 export { onVisualsPause, onVisualsResume, onVisualsThrottle };

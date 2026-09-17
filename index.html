@@ -37,6 +37,48 @@
       if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
       setTimeout(function(){ root.classList.remove('deep-linking'); }, 2000);
     })();
+    // Load profiler: add ?perf to the URL. Scripts call window.__perf('label') at milestones;
+    // a report prints to the console once the GPU's first frame lands (or after 8s).
+    // window.__perfReport() prints it again on demand.
+    (function(){
+      var on = /[?&]perf\b/.test(location.search);
+      var marks = [], longTasks = [];
+      window.__perf = function(label){ if (on) marks.push({ label: label, t: performance.now() }); };
+      if (!on) return;
+      try {
+        new PerformanceObserver(function(list){ list.getEntries().forEach(function(e){ longTasks.push(e); }); })
+          .observe({ type: 'longtask', buffered: true });
+      } catch (e) {}
+      var ms = function(v){ return Math.round(v) + ' ms'; };
+      window.__perfReport = function(){
+        var nav = performance.getEntriesByType('navigation')[0] || {};
+        var rows = [
+          { label: 'server response (TTFB)', t: nav.responseStart },
+          { label: 'HTML parsed (DOMContentLoaded)', t: nav.domContentLoadedEventEnd },
+          { label: 'window load', t: nav.loadEventEnd },
+        ];
+        performance.getEntriesByType('paint').forEach(function(p){ rows.push({ label: p.name, t: p.startTime }); });
+        rows = rows.concat(marks).filter(function(r){ return r.t > 0; }).sort(function(a, b){ return a.t - b.t; });
+        console.group('%c[perf] load timeline', 'color:#d4a843;font-weight:bold');
+        console.table(rows.map(function(r){ return { milestone: r.label, at: ms(r.t) }; }));
+        var blocked = longTasks.reduce(function(s, e){ return s + e.duration; }, 0);
+        console.log('main thread blocked by ' + longTasks.length + ' long tasks, ' + ms(blocked) + ' total');
+        console.table(longTasks.map(function(e){ return { start: ms(e.startTime), duration: ms(e.duration) }; }));
+        var res = performance.getEntriesByType('resource').slice().sort(function(a, b){ return b.duration - a.duration; }).slice(0, 15);
+        console.log('slowest downloads (kB 0 = served from cache):');
+        console.table(res.map(function(r){ return {
+          file: r.name.replace(location.origin, ''), start: ms(r.startTime), duration: ms(r.duration),
+          kB: Math.round((r.transferSize || 0) / 1024)
+        }; }));
+        console.groupEnd();
+      };
+      var printed = false;
+      var print = function(){ if (!printed) { printed = true; window.__perfReport(); } };
+      var origPerf = window.__perf;
+      window.__perf = function(label){ origPerf(label); if (label === 'GPU first frame done') setTimeout(print, 250); };
+      addEventListener('load', function(){ setTimeout(print, 8000); });
+    })();
+    __perf('head script');
   </script>
   <style>
     html.deep-linking body { opacity: 0; }
@@ -387,11 +429,11 @@
 
   <!-- Page order + links. Classic script: runs before the modules below, so
        the DOM is in its final order before visuals/audio initialize. -->
-  <script src="js/pages.js?v=12"></script>
+  <script src="js/pages.js?v=13"></script>
   <script src="js/rays.js?v=9"></script>
   <script type="module" src="js/audio.js?v=10"></script>
-  <script type="module" src="js/visuals.js?v=38"></script>
-  <script type="module" src="js/main.js?v=44"></script>
+  <script type="module" src="js/visuals.js?v=39"></script>
+  <script type="module" src="js/main.js?v=46"></script>
   <script src="js/contact-form.js?v=10"></script>
   <script src="js/share.js?v=2"></script>
   <script type="module" src="js/sonify.js?v=24"></script>

@@ -11,24 +11,37 @@ function newId(n = 8) {
 }
 
 const bool = v => v === true;
-const arr = (a, max) => Array.isArray(a) && a.length <= max;
+// The sequencer's exact schema: 16 steps, 5 melody rows, 5 pitches, melodyFreqs
+// derived from rows+pitches. Whatever arrives is normalized into that shape, so
+// a stored beat can never carry a pattern that breaks the page that loads it.
+const DEFAULT_PITCHES = [440, 392, 329.63, 293.66, 261.63]; // A4 G4 E4 D4 C4, high→low
 
 function cleanState(s) {
   if (!s || typeof s !== 'object') return null;
   const p = s.pattern;
-  if (!p || typeof p !== 'object') return null;
-  if (!arr(p.kick, 64) || !arr(p.hat, 64) || !arr(p.melodyRows, 16)) return null;
-  if (!p.melodyRows.every(r => arr(r, 64))) return null;
+  if (!p || typeof p !== 'object' || !Array.isArray(p.kick)) return null;
+  const cells = r => {
+    const out = new Array(16).fill(0);
+    if (Array.isArray(r)) for (let i = 0; i < 16; i++) out[i] = r[i] ? 1 : 0;
+    return out;
+  };
+  const kick = cells(p.kick);
+  const hat = cells(p.hat);
+  const pitches = Array.isArray(p.pitches) && p.pitches.length === 5 && p.pitches.every(f => Number.isFinite(+f) && +f > 0)
+    ? p.pitches.map(Number)
+    : DEFAULT_PITCHES;
+  const rows = Array.isArray(p.melodyRows) ? p.melodyRows : [];
+  const melodyRows = Array.from({ length: 5 }, (_, r) => cells(rows[r]));
+  const melodyFreqs = Array.from({ length: 16 }, (_, i) => {
+    const on = [];
+    for (let r = 0; r < 5; r++) if (melodyRows[r][i]) on.push(pitches[r]);
+    return on;
+  });
+  const bpm = Number.isFinite(+p.bpm) ? Math.min(240, Math.max(40, +p.bpm)) : 100;
   const pattern = {
-    kick: p.kick.map(Boolean).map(Number),
-    hat: p.hat.map(Boolean).map(Number),
-    melodyRows: p.melodyRows.map(r => r.map(Boolean).map(Number)),
-    melodyFreqs: arr(p.melodyFreqs, 64) ? p.melodyFreqs.map(f => arr(f, 16) ? f.map(Number).filter(Number.isFinite) : []) : [],
-    pitches: arr(p.pitches, 16) ? p.pitches.map(Number).filter(Number.isFinite) : [],
-    waveType: typeof p.waveType === 'string' ? p.waveType.slice(0, 16) : 'sine',
-    bpm: Number.isFinite(+p.bpm) ? Math.min(240, Math.max(40, +p.bpm)) : 100,
-    step: Number.isFinite(+p.step) ? +p.step : 0.15,
-    steps: Number.isFinite(+p.steps) ? Math.min(64, Math.max(1, +p.steps)) : 16,
+    kick, hat, melodyRows, melodyFreqs, pitches,
+    waveType: typeof p.waveType === 'string' && p.waveType ? p.waveType.slice(0, 16) : 'sine',
+    bpm, step: 60 / bpm / 2, steps: 16,
   };
   const wavetable = typeof s.wavetable === 'string' && /^[\w.-]{1,64}$/.test(s.wavetable) ? s.wavetable : null;
   return { pattern, wavetable, reverb: bool(s.reverb), delay: bool(s.delay), loop: bool(s.loop) };
