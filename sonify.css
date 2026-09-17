@@ -1252,3 +1252,25 @@ html:not(.is-mobile) #citizen-science .pg-split .pg-right .yt { max-width: calc(
 }
 .wwr-logo-link:hover .logo-tip,
 .wwr-logo-link:focus-visible .logo-tip { opacity: 1; }
+
+/* Share success: the button flashes a green check (share.js locks its width first) */
+#seq-share.is-shared { color: #7ddf8e; border-color: rgba(125, 223, 142, 0.55); }
+
+/* Share button glisten: a band of light sweeps left to right along the button */
+#seq-share { position: relative; overflow: hidden; }
+#seq-share::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: -60%;
+  width: 45%;
+  background: linear-gradient(105deg, transparent, rgba(255, 232, 170, 0.38), transparent);
+  transform: skewX(-18deg);
+  opacity: 0;
+  pointer-events: none;
+}
+#seq-share.glisten { border-color: rgba(255, 225, 150, 0.65); }
+#seq-share.glisten::before { animation: seq-share-glisten 0.85s ease-in-out; }
+@keyframes seq-share-glisten {
+  0%   { left: -60%; opacity: 1; }
+  100% { left: 120%; opacity: 1; }
+}

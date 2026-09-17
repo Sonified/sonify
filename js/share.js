@@ -11,7 +11,7 @@
   const toast = document.getElementById('seq-share-toast');
   if (!btn) return;
 
-  const TITLE = 'Check out this beat I just made with the sun ☀️🥁';
+  const TITLE = 'Check out this beat I made with the sun';
   const KEYS = ['sonara-seq-pattern', 'sonara-wavetable', 'sonara-reverb', 'sonara-delay', 'sonara-loop'];
 
   function readState() {
@@ -61,7 +61,9 @@
     if (busy) return;
     busy = true;
     const label = btn.textContent;
-    btn.textContent = 'Sharing…';
+    // Lock the width so nothing the label does can reflow the toolbar.
+    btn.style.width = Math.ceil(btn.getBoundingClientRect().width) + 'px';
+    let shared = false;
     try {
       const state = readState();
       if (!state.pattern) throw new Error('no pattern yet');
@@ -73,20 +75,60 @@
       if (!res.ok) throw new Error('save failed ' + res.status);
       const { url } = await res.json();
       if (navigator.share && matchMedia('(pointer: coarse)').matches) {
-        try { await navigator.share({ title: TITLE, text: TITLE, url }); say('Shared'); }
-        catch (e) { if (e && e.name !== 'AbortError') { await copy(url); say('Link copied'); } }
+        try { await navigator.share({ title: TITLE, text: TITLE, url }); say('Shared'); shared = true; }
+        catch (e) { if (e && e.name !== 'AbortError') { shared = await copy(url); say(shared ? 'Link copied' : url); } }
       } else {
-        const ok = await copy(url);
-        say(ok ? 'Link copied' : url);
+        shared = await copy(url);
+        say(shared ? 'Link copied' : url);
       }
     } catch (err) {
       console.warn('[share]', err);
       say('Could not share right now');
-    } finally {
-      btn.textContent = label;
+    }
+    if (shared) {
+      // Success: the button becomes a green check for a moment, then returns.
+      btn.textContent = '✓';
+      btn.classList.add('is-shared');
+      setTimeout(() => {
+        btn.textContent = label;
+        btn.classList.remove('is-shared');
+        btn.style.width = '';
+        busy = false;
+      }, 1200);
+    } else {
+      btn.style.width = '';
       busy = false;
     }
   });
+
+  // ---- glisten: a light sweeps across the Share button now and then ----
+  // Organic: each edit to the beat has a 1-in-5 chance. Timed: at the top of
+  // each minute with no glisten, the chance escalates 2/5 → 3/5 → 4/5 → certain.
+  let lastGlisten = 0, quietMinutes = 0;
+  function glisten() {
+    if (busy) return;                    // not over the green check
+    lastGlisten = Date.now();
+    quietMinutes = 0;
+    btn.classList.remove('glisten');
+    void btn.offsetWidth;                // restart cleanly if one is mid-sweep
+    btn.classList.add('glisten');
+  }
+  btn.addEventListener('animationend', () => btn.classList.remove('glisten'));
+
+  const synth = document.getElementById('stem-music');
+  if (synth) {
+    const isBeatEdit = t => t.closest && t.closest('.seq-cell, #seq-randomize') && !t.closest('#seq-share');
+    synth.addEventListener('click', e => { if (isBeatEdit(e.target) && Math.random() < 0.2) glisten(); });
+    synth.addEventListener('change', e => { if (!e.target.closest('#seq-share') && Math.random() < 0.2) glisten(); });
+  }
+
+  const MINUTE_CHANCE = [0.4, 0.6, 0.8, 1];
+  setInterval(() => {
+    if (Date.now() - lastGlisten < 60e3) return;   // happened organically this minute
+    const p = MINUTE_CHANCE[Math.min(quietMinutes, MINUTE_CHANCE.length - 1)];
+    quietMinutes++;
+    if (Math.random() < p) glisten();
+  }, 60e3);
 
   // Exposed for the beat page loader (functions/beat/[id].js injects the state before load).
   window.SONIFY_SHARE_KEYS = KEYS;

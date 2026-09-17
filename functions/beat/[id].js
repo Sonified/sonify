@@ -1,5 +1,5 @@
 // GET /beat/<id>  ->  the site, with this beat's preview tags and settings baked in.
-const TITLE = 'Check out this beat I just made with the sun ☀️🥁';
+const TITLE = 'Check out this beat I made with the sun';
 const DESC = 'Sound Science: play NASA data at sonify.now.audio';
 
 export async function onRequestGet({ request, params, env }) {
