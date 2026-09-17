@@ -721,9 +721,9 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 .is-mobile #pages > .section.is-last { padding-bottom: 1.5rem; }
 
 /* ----- Rising starfield behind every page after the hero ----- */
-#edu-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
-#hero { background: var(--bg); z-index: 1; }   /* opaque hero hides the starfield until you scroll */
-.page-qr { background: transparent; }
+.is-mobile #edu-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.is-mobile #hero { background: var(--bg); z-index: 1; }   /* opaque hero hides the starfield until you scroll */
+.is-mobile .page-qr { background: transparent; }
 /* Phones: Connect link back under the Edgar Mitchell video */
 .is-mobile #vision .ghost-link { display: inline-flex !important; }
 

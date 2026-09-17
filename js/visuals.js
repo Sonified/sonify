@@ -6242,9 +6242,11 @@ function initEduCanvas() {
   let time = 5 + Math.random() * 10;
   // Phones can switch the wandering emitter off via SONIFY.MOBILE.starEmitter (js/pages.js).
   const autoEmitterOn = !(document.documentElement.classList.contains('is-mobile') && window.SONIFY?.MOBILE?.starEmitter === false);
-  // Global layer: draw whenever any page after the hero is on screen.
-  const vis = { visible: false, _set: new Map() };
-  {
+  const starsGlobal = document.documentElement.classList.contains('is-mobile');
+  // Phones: global layer, draws whenever any page after the hero is on screen.
+  // Desktop: only while the Listen to Space page is on screen (original Sonara behavior).
+  const vis = starsGlobal ? { visible: false, _set: new Map() } : trackVisibility('education');
+  if (starsGlobal) {
     const update = () => { vis.visible = !document.hidden && Array.from(vis._set.values()).some(Boolean); };
     const obs = new IntersectionObserver((entries) => {
       entries.forEach(en => vis._set.set(en.target, en.isIntersecting));
@@ -6338,6 +6340,15 @@ function initEduCanvas() {
     c.fillRect(0, 0, w, h);
 
 
+    // Dome ring (desktop only)
+    if (!starsGlobal) {
+      c.strokeStyle = 'rgba(74, 143, 212, 0.06)';
+      c.lineWidth = 1;
+      c.beginPath();
+      c.arc(w / 2, h / 2, Math.min(w, h) * 0.38, 0, Math.PI * 2);
+      c.stroke();
+    }
+
     // Stars
     for (let i = stars.length - 1; i >= 0; i--) {
       const s = stars[i];
@@ -6396,7 +6407,7 @@ function initEduCanvas() {
 
   // Click + drag to add stars
   let domeDragging = false;
-  const domeEl = document.getElementById('pages') || document.getElementById('education');
+  const domeEl = starsGlobal ? document.getElementById('pages') : document.getElementById('education');
 
   function spawnStars(e) {
     if (e.target && e.target.closest && e.target.closest('#hero')) return; // hero has its own burst interaction

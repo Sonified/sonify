@@ -89,8 +89,16 @@ window.SONIFY = {
   console.log('[pages] order:', finalPages.map(s => s.dataset.page).join(' → '));
 
   // ----- 1b. Phone switches (runs before visuals.js, so removed canvases never initialize) -----
-  if (document.documentElement.classList.contains('is-mobile') && cfg.MOBILE) {
-    if (!cfg.MOBILE.blobs) document.getElementById('vision-canvas')?.remove();
+  const isPhone = document.documentElement.classList.contains('is-mobile');
+  if (isPhone) {
+    // Phones: starfield stays a fixed layer behind every page; no spectrum bars.
+    document.getElementById('spectrum-canvas')?.remove();
+    if (cfg.MOBILE && !cfg.MOBILE.blobs) document.getElementById('vision-canvas')?.remove();
+  } else {
+    // Desktop: starfield lives inside the Listen to Space page, as in Sonara.
+    const stars = document.getElementById('edu-canvas');
+    const home = document.getElementById('education');
+    if (stars && home) home.insertBefore(stars, home.firstChild);
   }
 
   // ----- 2. Links -----

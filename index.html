@@ -29,7 +29,7 @@
     })();
   </script>
   <link rel="stylesheet" href="styles.css?v=1">
-  <link rel="stylesheet" href="sonify.css?v=16">
+  <link rel="stylesheet" href="sonify.css?v=17">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -37,7 +37,8 @@
 </head>
 <body>
   <div id="cursor-glow"></div>
-  <!-- Rising starfield: fixed layer behind every page after the hero (drawn by initEduCanvas) -->
+  <!-- Rising starfield (drawn by initEduCanvas). Desktop: js/pages.js moves it back inside the
+       Listen to Space page. Phones: stays here as a fixed layer behind every page after the hero. -->
   <canvas id="edu-canvas" aria-hidden="true"></canvas>
 
   <!--
@@ -165,6 +166,7 @@
 
   <!-- ===== PAGE: synth (spectrum background, Sonara instruments) ===== -->
   <section id="stem-music" class="section" data-page="synth" data-nav="Play the Sun" data-sound="stem-music">
+    <canvas id="spectrum-canvas"></canvas>
     <div class="music-bg"></div>
     <div class="music-content">
       <div class="music-header">
@@ -215,7 +217,7 @@
             </div>
           </div>
           <h3><span class="contact-accent-word" style="color: var(--accent);">Meditate</span> with the Sun</h3>
-          <p>Raw solar data, streaming as sound and light. Breathe it in. <span class="meditate-arrow">&rarr;</span></p>
+          <p>Raw solar data, streaming as sound and light. Breathe it in.<br><span class="meditate-arrow">&rarr;</span></p>
         </a>
         </div>
       </div>
@@ -303,11 +305,11 @@
 
   <!-- Page order + links. Classic script: runs before the modules below, so
        the DOM is in its final order before visuals/audio initialize. -->
-  <script src="js/pages.js?v=3"></script>
+  <script src="js/pages.js?v=4"></script>
   <script src="js/rays.js?v=9"></script>
   <script type="module" src="js/audio.js?v=10"></script>
-  <script type="module" src="js/visuals.js?v=32"></script>
-  <script type="module" src="js/main.js?v=37"></script>
+  <script type="module" src="js/visuals.js?v=33"></script>
+  <script type="module" src="js/main.js?v=38"></script>
   <script type="module" src="js/sonify.js?v=2"></script>
 </body>
 </html>
