@@ -113,7 +113,7 @@ function trackVisibility(sectionId) {
 // ===== Shared tuning constants =====
 const HERO_DEBUG_DEFAULTS = {
   seedParticles: {
-    mobile: 1000,
+    mobile: 900,
     desktop: 2000,
   },
   maxParticles: {
@@ -307,6 +307,7 @@ function initHeroCanvas() {
 
   // WebGPU slot management (initialized after BUFFER_CAP is defined)
   let gpuWatermark = 0;
+  let gpuFlagsCopiedCount = 0; // slots included in the last flags readback copy
   const gpuFreeSlots = [];
   let gpuSlots = null; // initialized in init() when BUFFER_CAP is available
 
@@ -334,10 +335,54 @@ function initHeroCanvas() {
     }
   }
   function gpuGetSlot() {
-    if (gpuFreeSlots.length > 0) return gpuFreeSlots.pop();
-    if (gpuWatermark < BUFFER_CAP) return gpuWatermark++;
-    return -1;
+    let slot = -1;
+    if (gpuFreeSlots.length > 0) slot = gpuFreeSlots.pop();
+    else if (gpuWatermark < BUFFER_CAP) slot = gpuWatermark++;
+    if (slot >= 0) gpuSlots[slot].ghost = false;
+    return slot;
   }
+
+  // Phones: when a particle turns into an edge ghost, spawn its replacement on the
+  // opposite side, heading the way the original was going. At the cap: no replacement.
+  function spawnWrapReplacement(side, along, canWhiten) {
+    if ((gpuWatermark - gpuFreeSlots.length) >= MAX_PARTICLES) return;
+    const speed = 0.2 + Math.random() * 0.4;
+    const drift = (Math.random() - 0.5) * 0.4;
+    let x, y, vx, vy;
+    if (side === 0)      { x = w - 1; y = along; vx = -speed; vy = drift; } // left edge -> enters from right
+    else if (side === 1) { x = 1;     y = along; vx =  speed; vy = drift; } // right -> left
+    else if (side === 2) { x = along; y = h - 1; vx = drift;  vy = -speed; } // top -> bottom
+    else                 { x = along; y = 1;     vx = drift;  vy =  speed; } // bottom -> top
+    x = Math.min(w - 1, Math.max(1, x));
+    y = Math.min(h - 1, Math.max(1, y));
+    const slot = gpuGetSlot();
+    if (slot < 0) return;
+    const pid = nextPid = (nextPid + 1) % PID_MAX;
+    const s = gpuSlots[slot];
+    s.dead = false; s.pid = pid;
+    s.x = x; s.y = y; s.vx = vx; s.vy = vy;
+    s.canWhiten = canWhiten;
+    s.life = undefined;
+    const phase = Math.random() * Math.PI * 2;
+    const alpha = Math.random() * 0.4 + 0.1;
+    const r = Math.random() * 2 + 0.5;
+    const fadeIn = 20;
+    const reactivity = 0.3 + Math.random() * 0.7;
+    const rippleSpeed = RIPPLE_SPEED_BASE + Math.random() * RIPPLE_SPEED_VAR;
+    if (gpuHasF16) {
+      const buf = writeParticleF16(x, y, pid, vx, vy, phase, alpha, r, 0, fadeIn, 0, 0, 0, reactivity, rippleSpeed, canWhiten ? 1 : 0);
+      gpuDevice.queue.writeBuffer(gpuParticleBuf, slot * GPU_PARTICLE_STRIDE, buf);
+    } else {
+      const tmp = new Float32Array(16);
+      tmp[0] = x; tmp[1] = y; tmp[2] = vx; tmp[3] = vy;
+      tmp[4] = phase; tmp[5] = alpha; tmp[6] = r; tmp[7] = 0;
+      tmp[8] = fadeIn; tmp[9] = 0; tmp[10] = 0; tmp[11] = 0;
+      tmp[12] = reactivity; tmp[13] = rippleSpeed;
+      tmp[14] = canWhiten ? 1 : 0; tmp[15] = pid;
+      gpuDevice.queue.writeBuffer(gpuParticleBuf, slot * GPU_PARTICLE_STRIDE, tmp);
+    }
+  }
+
   let time = 0;
   let lineIntensity = 0;
   const DEBUG_HUD_UPDATE_FPS = 4;
@@ -1889,11 +1934,18 @@ fn main(@builtin(global_invocation_id) gid: vec3u) {
   // Edge wrapping
   var wrapped = false;
   if (u.bounceLR == 2u) {
-    // Reflect: stay at the edge, flip velocity. No teleport, so lines stay live.
-    if (p.x < 0.0) { p.x = 0.0; p.vx = abs(p.vx); }
-    else if (p.x > u.w) { p.x = u.w; p.vx = -abs(p.vx); }
-    if (p.y < 0.0) { p.y = 0.0; p.vy = abs(p.vy); }
-    else if (p.y > u.h) { p.y = u.h; p.vy = -abs(p.vy); }
+    // Phones: bounce off the edge and become a ghost that fades out over ~1s,
+    // keeping its connections. The CPU spawns the replacement on the far side.
+    var side = -1.0; // 0 left, 1 right, 2 top, 3 bottom
+    if (p.x < 0.0) { p.x = 0.0; p.vx = abs(p.vx); side = 0.0; }
+    else if (p.x > u.w) { p.x = u.w; p.vx = -abs(p.vx); side = 1.0; }
+    if (p.y < 0.0) { p.y = 0.0; p.vy = abs(p.vy); if (side < 0.0) { side = 2.0; } }
+    else if (p.y > u.h) { p.y = u.h; p.vy = -abs(p.vy); if (side < 0.0) { side = 3.0; } }
+    if (side >= 0.0 && p.fadeIn >= 0.0) {
+      p.fadeIn = -(side + 1.0); // ghost marker, remembers the edge
+      if (p.life > 0.0) { p.decay = p.life / 60.0; }
+      else { p.baseAlpha = p.alpha; p.life = 1.0; p.decay = 1.0 / 60.0; }
+    }
   } else {
   if (u.bounceLR != 0u) {
     if (p.x < 0.0) { p.x = 0.0; p.y = u.h - p.y; p.vx = abs(p.vx); wrapped = true; }
@@ -1915,6 +1967,12 @@ fn main(@builtin(global_invocation_id) gid: vec3u) {
   if (p.life > 0.0) { flags |= 2u; }
   if (p.canWhiten > 0.5) { flags |= 4u; }
   if (wrapped) { flags |= 8u; }
+  if (p.fadeIn < 0.0 && p.life > 0.0) {
+    // ghost: bit 4, edge in bits 5-6, position along that edge in bits 8-31
+    let gSide = u32(-p.fadeIn - 1.0);
+    let along = select(p.x, p.y, gSide < 2u);
+    flags |= 16u | (gSide << 5u) | (u32(clamp(along, 0.0, 65535.0)) << 8u);
+  }
 
   output[i] = ParticleOut(p.x, p.y, p.vx, p.vy, currentSize, currentAlpha, u32(p.pid), flags);
 }
@@ -2114,11 +2172,18 @@ fn main(@builtin(global_invocation_id) gid: vec3u) {
   // Edge wrapping
   var wrapped = false;
   if (u.bounceLR == 2u) {
-    // Reflect: stay at the edge, flip velocity. No teleport, so lines stay live.
-    if (p.x < 0.0) { p.x = 0.0; vx = abs(vx); }
-    else if (p.x > u.w) { p.x = u.w; vx = -abs(vx); }
-    if (p.y < 0.0) { p.y = 0.0; vy = abs(vy); }
-    else if (p.y > u.h) { p.y = u.h; vy = -abs(vy); }
+    // Phones: bounce off the edge and become a ghost that fades out over ~1s,
+    // keeping its connections. The CPU spawns the replacement on the far side.
+    var side = -1.0; // 0 left, 1 right, 2 top, 3 bottom
+    if (p.x < 0.0) { p.x = 0.0; vx = abs(vx); side = 0.0; }
+    else if (p.x > u.w) { p.x = u.w; vx = -abs(vx); side = 1.0; }
+    if (p.y < 0.0) { p.y = 0.0; vy = abs(vy); if (side < 0.0) { side = 2.0; } }
+    else if (p.y > u.h) { p.y = u.h; vy = -abs(vy); if (side < 0.0) { side = 3.0; } }
+    if (side >= 0.0 && fadeInVal >= 0.0) {
+      fadeInVal = -(side + 1.0); // ghost marker, remembers the edge
+      if (life > 0.0) { decay = life / 60.0; }
+      else { baseAlpha = alpha; life = 1.0; decay = 1.0 / 60.0; }
+    }
   } else {
   if (u.bounceLR != 0u) {
     if (p.x < 0.0) { p.x = 0.0; p.y = u.h - p.y; vx = abs(vx); wrapped = true; }
@@ -2147,6 +2212,12 @@ fn main(@builtin(global_invocation_id) gid: vec3u) {
   if (life > 0.0) { flags |= 2u; }
   if (canWhiten > 0.5) { flags |= 4u; }
   if (wrapped) { flags |= 8u; }
+  if (fadeInVal < 0.0 && life > 0.0) {
+    // ghost: bit 4, edge in bits 5-6, position along that edge in bits 8-31
+    let gSide = u32(-fadeInVal - 1.0);
+    let along = select(p.x, p.y, gSide < 2u);
+    flags |= 16u | (gSide << 5u) | (u32(clamp(along, 0.0, 65535.0)) << 8u);
+  }
 
   output[i] = ParticleOut(p.x, p.y, f16(vx), f16(vy), f16(currentSize), f16(currentAlpha), p.pid_bits, flags);
 }
@@ -2731,9 +2802,12 @@ fn connFade(@builtin(global_invocation_id) gid: vec3u) {
     c.state = 1u;
   }
 
+  var ghostLine = false;
   if (c.state == 1u) {
     let flagsA = pOut[c.idxA].flags;
     let flagsB = pOut[c.idxB].flags;
+    ghostLine = ((flagsA | flagsB) & 16u) != 0u;
+    if (ghostLine) { c.tgt = 0.0; }
     let deadA = (flagsA & 1u) != 0u;
     let deadB = (flagsB & 1u) != 0u;
     let wrappedA = (flagsA & 8u) != 0u;
@@ -2767,7 +2841,8 @@ fn connFade(@builtin(global_invocation_id) gid: vec3u) {
     }
   }
 
-  let rate = select(cu.connFadeOut, cu.connFadeIn, c.tgt > c.alpha);
+  var rate = select(cu.connFadeOut, cu.connFadeIn, c.tgt > c.alpha);
+  if (ghostLine) { rate = 0.065; } // ~1s, matches the ghost's own fade
   c.alpha += (c.tgt - c.alpha) * rate;
 
   if (c.alpha < cu.connKillAlpha && c.tgt == 0.0) {
@@ -3387,9 +3462,12 @@ fn connFade(@builtin(global_invocation_id) gid: vec3u) {
     c.state = 1u;
   }
 
+  var ghostLine = false;
   if (c.state == 1u) {
     let flagsA = pOut[c.idxA].flags;
     let flagsB = pOut[c.idxB].flags;
+    ghostLine = ((flagsA | flagsB) & 16u) != 0u;
+    if (ghostLine) { c.tgt = 0.0; }
     let deadA = (flagsA & 1u) != 0u;
     let deadB = (flagsB & 1u) != 0u;
     let wrappedA = (flagsA & 8u) != 0u;
@@ -3423,7 +3501,8 @@ fn connFade(@builtin(global_invocation_id) gid: vec3u) {
     }
   }
 
-  let rate = select(cu.connFadeOut, cu.connFadeIn, c.tgt > c.alpha);
+  var rate = select(cu.connFadeOut, cu.connFadeIn, c.tgt > c.alpha);
+  if (ghostLine) { rate = 0.065; } // ~1s, matches the ghost's own fade
   c.alpha += (c.tgt - c.alpha) * rate;
 
   if (c.alpha < cu.connKillAlpha && c.tgt == 0.0) {
@@ -5010,6 +5089,7 @@ fn fs(in: VSOut) -> @location(0) vec4f {
           fxPass.end();
 
           commandEncoder.copyBufferToBuffer(gpuFlagsExtractBuf, 0, gpuFlagsReadBuf, 0, gpuWatermark * 4);
+          gpuFlagsCopiedCount = gpuWatermark;
           // Copy line count (1 u32) for debug HUD
           const lineCountSrc = gpuDevice._usePackedConn ? gpuAuxCounters : gpuConnAtomics;
           commandEncoder.copyBufferToBuffer(lineCountSrc, 0, gpuLineCountReadBuf, 0, 4);
@@ -5026,16 +5106,23 @@ fn fs(in: VSOut) -> @location(0) vec4f {
           Promise.all([flagsPromise, lineCountPromise]).then(() => {
             const range = gpuFlagsReadBuf.getMappedRange();
             const flags = new Uint32Array(range);
-            for (let i = 0; i < gpuWatermark; i++) {
+            const newGhosts = [];
+            const n = Math.min(gpuWatermark, gpuFlagsCopiedCount);
+            for (let i = 0; i < n; i++) {
               const f = flags[i];
               const dead = (f & 1) !== 0;
               const s = gpuSlots[i];
               if (dead && !s.dead) {
                 s.dead = true;
                 gpuFreeSlots.push(i);
+              } else if (REFLECT_EDGES && !dead && !s.dead && (f & 16) !== 0 && !s.ghost) {
+                s.ghost = true;
+                newGhosts.push(f);
               }
             }
             gpuFlagsReadBuf.unmap();
+            // Spawn replacements only after the scan, so a reused slot is never read as dead.
+            for (const f of newGhosts) spawnWrapReplacement((f >>> 5) & 3, f >>> 8, (f & 4) !== 0);
             gpuLineCount = new Uint32Array(gpuLineCountReadBuf.getMappedRange())[0] || 0;
             gpuLineCountReadBuf.unmap();
             gpuReadbackPending = false;
