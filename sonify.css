@@ -1256,8 +1256,9 @@ html:not(.is-mobile) #citizen-science .pg-split .pg-right .yt { max-width: calc(
 /* Share success: the button flashes a green check (share.js locks its width first) */
 #seq-share.is-shared { color: #7ddf8e; border-color: rgba(125, 223, 142, 0.55); }
 
-/* Share button glisten: a band of light sweeps left to right along the button */
-#seq-share { position: relative; overflow: hidden; }
+/* Share button glisten: a band of light sweeps quickly, then slows and fades;
+   the lit border lingers and fades down slowly so the eye stays a beat longer. */
+#seq-share { position: relative; overflow: hidden; transition: border-color 1.4s cubic-bezier(0.2, 0.6, 0.4, 1); }
 #seq-share::before {
   content: '';
   position: absolute;
@@ -1268,9 +1269,15 @@ html:not(.is-mobile) #citizen-science .pg-split .pg-right .yt { max-width: calc(
   opacity: 0;
   pointer-events: none;
 }
-#seq-share.glisten { border-color: rgba(255, 225, 150, 0.65); }
-#seq-share.glisten::before { animation: seq-share-glisten 0.85s ease-in-out; }
+#seq-share.glisten-lit { border-color: rgba(255, 225, 150, 0.65); transition: border-color 0.12s ease; }
+#seq-share.glisten::before { animation: seq-share-glisten 1.4s cubic-bezier(0.15, 0.75, 0.25, 1); }
 @keyframes seq-share-glisten {
   0%   { left: -60%; opacity: 1; }
-  100% { left: 120%; opacity: 1; }
+  65%  { opacity: 0.85; }
+  100% { left: 120%; opacity: 0; }
 }
+
+/* Phones, Listen to Space: the long title fits in two lines, and the video
+   sits a bit higher (30% more room below it). */
+.is-mobile #education .pg-title { font-size: 1.65rem; }
+.is-mobile #education { padding-bottom: 7.29rem; }

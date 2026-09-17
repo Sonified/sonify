@@ -105,13 +105,16 @@
   // Organic: each edit to the beat has a 1-in-5 chance. Timed: at the top of
   // each minute with no glisten, the chance escalates 2/5 → 3/5 → 4/5 → certain.
   let lastGlisten = 0, quietMinutes = 0;
+  let litTimer = 0;
   function glisten() {
     if (busy) return;                    // not over the green check
     lastGlisten = Date.now();
     quietMinutes = 0;
-    btn.classList.remove('glisten');
+    btn.classList.remove('glisten', 'glisten-lit');
     void btn.offsetWidth;                // restart cleanly if one is mid-sweep
-    btn.classList.add('glisten');
+    btn.classList.add('glisten', 'glisten-lit');
+    clearTimeout(litTimer);
+    litTimer = setTimeout(() => btn.classList.remove('glisten-lit'), 250);  // border starts fading early
   }
   btn.addEventListener('animationend', () => btn.classList.remove('glisten'));
 
