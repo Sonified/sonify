@@ -826,3 +826,37 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 /* Phones: Rolling Stone card first, Solar Sample Pack second */
 .is-mobile .pg-cards .pg-card-press { order: 1; }
 .is-mobile .pg-cards [data-link="samplePack"] { order: 2; }
+
+/* Phones: stats row centered; each label centered under its number */
+.is-mobile #citizen-science .pg-stats { justify-content: center; align-self: center; }
+.is-mobile .pg-stat { align-items: center; text-align: center; }
+
+/* Meditate visual: the sun holds still, only the rings breathe in and out */
+.sun-breath { animation: none; }
+.sun-ring.r1 { animation: ringBreath 11s ease-in-out infinite 0s; }
+.sun-ring.r2 { animation: ringBreath 11s ease-in-out infinite 0.4s; }
+.sun-ring.r3 { animation: ringBreath 11s ease-in-out infinite 0.8s; }
+.sun-ring.r4 { animation: ringBreath 11s ease-in-out infinite 1.2s; }
+.sun-ring.r5 { animation: ringBreath 11s ease-in-out infinite 1.6s; }
+@keyframes ringBreath {
+  0%, 100% { transform: scale(0.78); opacity: 0.25; }
+  50%      { transform: scale(1);    opacity: 0.7; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sun-ring { animation: none !important; }
+}
+
+/* Meditate visual: let the sun's glow spill past its box instead of being clipped */
+.meditate-card { overflow: visible; }
+.meditate-visual { overflow: visible; border-radius: 12px 12px 0 0; }
+.is-mobile .meditate-visual { height: 264px !important; } /* 20% taller than 220px */
+
+/* Phones: 10% more room above Listen to Space (8.15rem -> 8.97rem) */
+.is-mobile #education { padding-top: 8.97rem; }
+/* Phones: 25% less room above Pop Production (6.27rem -> 4.7rem) */
+.is-mobile #citizen-science { padding-top: 4.7rem; }
+
+/* Phones: Breathe section 20% more room above (11rem -> 13.2rem), total gap below +10% (margin 3rem -> 4.5rem) */
+.is-mobile .meditate-card { margin-top: 13.2rem; margin-bottom: 4.5rem; }
+/* Phones: 15% more room above Breathe (13.2rem -> 15.18rem) */
+.is-mobile .meditate-card { margin-top: 15.18rem; }
