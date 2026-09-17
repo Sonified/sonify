@@ -196,6 +196,10 @@ let GATHER_SELECT = localStorage.getItem('sonara_gatherSelect') !== '0';
 let DUAL_CHECK = localStorage.getItem('sonara_dualCheck') === '1';
 let ONE_OWNER = localStorage.getItem('sonara_oneOwner') === '1';
 let BOUNCE_LR = localStorage.getItem('sonara_bounceLR') !== '0';
+// Phones: particles reflect off all four edges (no wrap, no mirror jump), so they
+// never teleport and their lines stay live. Edge mode 2 in the shaders.
+const REFLECT_EDGES = document.documentElement.classList.contains('is-mobile');
+function edgeMode() { return REFLECT_EDGES ? 2 : (BOUNCE_LR ? 1 : 0); }
 let FADE_UP_SECS = +(localStorage.getItem('sonara_fadeUpSecs') || 1);
 let FADE_FRAMES = Math.round(FADE_UP_SECS * 120);
 function clampWhiteParticlePct(value) {
@@ -1127,6 +1131,7 @@ function initHeroCanvas() {
     syncDebugHudVisibility();
   }
 
+  let ringVarTick = 0, lastRingBottom = -1;
   const rippleRadiusOverlay = document.createElement('div');
   rippleRadiusOverlay.style.cssText = 'position:absolute;left:0;top:0;border:1px solid rgba(228,188,88,0.75);border-radius:50%;pointer-events:none;box-shadow:0 0 0 1px rgba(0,0,0,0.2),0 0 18px rgba(228,188,88,0.18);opacity:0;display:none;transform:translate(-50%,-50%);z-index:0'; // z 0: above the canvas, below .hero-inner text (z 1)
   if (canvas.parentElement) {
@@ -1385,6 +1390,13 @@ function initHeroCanvas() {
       vy *= u_friction;
 
       // Edge wrapping (horizontal wrap or bounce, vertical mirror-bounce)
+      if (u_bounceLR > 1.5) {
+        // Reflect: stay at the edge, flip velocity (phones).
+        if (x < 0.0) { x = 0.0; vx = abs(vx); }
+        else if (x > u_resolution.x) { x = u_resolution.x; vx = -abs(vx); }
+        if (y < 0.0) { y = 0.0; vy = abs(vy); }
+        else if (y > u_resolution.y) { y = u_resolution.y; vy = -abs(vy); }
+      } else {
       if (u_bounceLR > 0.5) {
         if (x < 0.0) { x = 0.0; y = u_resolution.y - y; vx = abs(vx); }
         else if (x > u_resolution.x) { x = u_resolution.x; y = u_resolution.y - y; vx = -abs(vx); }
@@ -1400,6 +1412,7 @@ function initHeroCanvas() {
         y = u_resolution.y;
         x = u_resolution.x - x;
         vy = -abs(vy);
+      }
       }
 
       // Output updated state
@@ -1875,6 +1888,13 @@ fn main(@builtin(global_invocation_id) gid: vec3u) {
 
   // Edge wrapping
   var wrapped = false;
+  if (u.bounceLR == 2u) {
+    // Reflect: stay at the edge, flip velocity. No teleport, so lines stay live.
+    if (p.x < 0.0) { p.x = 0.0; p.vx = abs(p.vx); }
+    else if (p.x > u.w) { p.x = u.w; p.vx = -abs(p.vx); }
+    if (p.y < 0.0) { p.y = 0.0; p.vy = abs(p.vy); }
+    else if (p.y > u.h) { p.y = u.h; p.vy = -abs(p.vy); }
+  } else {
   if (u.bounceLR != 0u) {
     if (p.x < 0.0) { p.x = 0.0; p.y = u.h - p.y; p.vx = abs(p.vx); wrapped = true; }
     else if (p.x > u.w) { p.x = u.w; p.y = u.h - p.y; p.vx = -abs(p.vx); wrapped = true; }
@@ -1884,6 +1904,7 @@ fn main(@builtin(global_invocation_id) gid: vec3u) {
   }
   if (p.y < 0.0) { p.y = 0.0; p.x = u.w - p.x; p.vy = abs(p.vy); wrapped = true; }
   else if (p.y > u.h) { p.y = u.h; p.x = u.w - p.x; p.vy = -abs(p.vy); wrapped = true; }
+  }
 
   // Write back updated state
   particles[i] = p;
@@ -2092,6 +2113,13 @@ fn main(@builtin(global_invocation_id) gid: vec3u) {
 
   // Edge wrapping
   var wrapped = false;
+  if (u.bounceLR == 2u) {
+    // Reflect: stay at the edge, flip velocity. No teleport, so lines stay live.
+    if (p.x < 0.0) { p.x = 0.0; vx = abs(vx); }
+    else if (p.x > u.w) { p.x = u.w; vx = -abs(vx); }
+    if (p.y < 0.0) { p.y = 0.0; vy = abs(vy); }
+    else if (p.y > u.h) { p.y = u.h; vy = -abs(vy); }
+  } else {
   if (u.bounceLR != 0u) {
     if (p.x < 0.0) { p.x = 0.0; p.y = u.h - p.y; vx = abs(vx); wrapped = true; }
     else if (p.x > u.w) { p.x = u.w; p.y = u.h - p.y; vx = -abs(vx); wrapped = true; }
@@ -2101,6 +2129,7 @@ fn main(@builtin(global_invocation_id) gid: vec3u) {
   }
   if (p.y < 0.0) { p.y = 0.0; p.x = u.w - p.x; vy = abs(vy); wrapped = true; }
   else if (p.y > u.h) { p.y = u.h; p.x = u.w - p.x; vy = -abs(vy); wrapped = true; }
+  }
 
   // Write back updated state
   p.vx = f16(vx); p.vy = f16(vy);
@@ -4616,7 +4645,7 @@ fn fs(in: VSOut) -> @location(0) vec4f {
       gpuUniformU32[18] = gpuWatermark;
       gpuUniformF32[19] = gpuResizeScaleX;
       gpuUniformF32[20] = gpuResizeScaleY;
-      gpuUniformU32[21] = BOUNCE_LR ? 1 : 0;
+      gpuUniformU32[21] = edgeMode();
       gpuResizeScaleX = 1.0;
       gpuResizeScaleY = 1.0;
 
@@ -5098,7 +5127,7 @@ fn fs(in: VSOut) -> @location(0) vec4f {
       gl.uniform1f(tfLoc.u_heroPlaying, heroAudioPlaying ? 1.0 : 0.0);
       gl.uniform1f(tfLoc.u_friction, FRICTION);
       gl.uniform1f(tfLoc.u_rippleInnerRadius, RIPPLE_INNER_RADIUS);
-      gl.uniform1f(tfLoc.u_bounceLR, BOUNCE_LR ? 1.0 : 0.0);
+      gl.uniform1f(tfLoc.u_bounceLR, edgeMode());
       gl.uniform1i(tfLoc.u_rippleTex, 0);
 
       gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -5505,6 +5534,13 @@ fn fs(in: VSOut) -> @location(0) vec4f {
 
         // Edge wrapping
         let wrapped = false;
+        if (REFLECT_EDGES) {
+          // Reflect: stay at the edge, flip velocity. No teleport, so lines stay live.
+          if (p.x < 0) { p.x = 0; p.vx = Math.abs(p.vx); }
+          else if (p.x > w) { p.x = w; p.vx = -Math.abs(p.vx); }
+          if (p.y < 0) { p.y = 0; p.vy = Math.abs(p.vy); }
+          else if (p.y > h) { p.y = h; p.vy = -Math.abs(p.vy); }
+        } else {
         if (BOUNCE_LR) {
           if (p.x < 0) { p.x = 0; p.y = h - p.y; p.vx = Math.abs(p.vx); wrapped = true; }
           else if (p.x > w) { p.x = w; p.y = h - p.y; p.vx = -Math.abs(p.vx); wrapped = true; }
@@ -5514,6 +5550,7 @@ fn fs(in: VSOut) -> @location(0) vec4f {
         }
         if (p.y < 0) { p.y = 0; p.x = w - p.x; p.vy = Math.abs(p.vy); wrapped = true; }
         else if (p.y > h) { p.y = h; p.x = w - p.x; p.vy = -Math.abs(p.vy); wrapped = true; }
+        }
         if (wrapped) {
           const pid = p.pid;
           for (const [ck] of connFade) {
@@ -5568,6 +5605,17 @@ fn fs(in: VSOut) -> @location(0) vec4f {
 
     gl.bindVertexArray(null);
     } // end if (!WEBGPU_RENDER) — WebGL2 render
+
+    // Publish the ring's lower edge (px from the top of the hero) as --ring-bottom,
+    // so page chrome can sit just beneath it. Updated a few times a second.
+    if (RIPPLE_INNER_RADIUS > 0 && (ringVarTick++ % 15) === 0 && canvas.parentElement) {
+      const cr = canvas.getBoundingClientRect();
+      const bottomPx = Math.round((btnCY / h) * cr.height + RIPPLE_INNER_RADIUS * (cr.width / w));
+      if (bottomPx !== lastRingBottom) {
+        lastRingBottom = bottomPx;
+        canvas.parentElement.style.setProperty('--ring-bottom', bottomPx + 'px');
+      }
+    }
 
     if (SHOW_RIPPLE_RADIUS && RIPPLE_INNER_RADIUS > 0) {
       if (!radiusLocked) {
