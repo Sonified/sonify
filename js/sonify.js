@@ -596,26 +596,8 @@ void main() {
         g.drawArrays(g.TRIANGLES, 0, 3);
         [ping, pong] = [pong, ping];
       }
-      // Snapshot of the picture as it is right now (drawn and read in the same task,
-      // so no preserveDrawingBuffer is needed). dt = 0 leaves the trail history untouched.
-      function snapshot() { draw(0); return cv; }
-      return { draw, snapshot };
+      return { draw };
     }
-
-    // For the Share button: a canvas holding the live sun (with trails when available).
-    window.SONIFY_SUN = {
-      snapshot() {
-        if (fx) return fx.snapshot();
-        if (v.readyState >= 2) {
-          const c = document.createElement('canvas');
-          c.width = v.videoWidth; c.height = v.videoHeight;
-          c.getContext('2d').drawImage(v, 0, 0);
-          return c;
-        }
-        return null;
-      },
-      scale: () => (fx ? 1 : scaleNow()),
-    };
 
     // ---- run only while visible ----
     let visible = false, raf = 0;

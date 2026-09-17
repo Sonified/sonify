@@ -1,9 +1,9 @@
 /* ============================================================
    Share a beat (Play the Sun page)
-   Collects the sequencer state (pattern, wavetable, delay, reverb, loop),
-   snapshots the live sun with its solar-wind trails, and posts both to
-   /api/beat (Cloudflare Pages Function). The returned link opens a page
-   whose preview shows that exact sun and loads that exact beat.
+   Collects the sequencer state (pattern, wavetable, delay, reverb, loop) and
+   the half-second of the sun video on screen, and posts them to /api/beat
+   (Cloudflare Pages Function). The returned link opens a page that loads that
+   exact beat; its preview is the matching pre-baked sun thumbnail.
    ============================================================ */
 (function () {
   'use strict';
@@ -28,27 +28,12 @@
     };
   }
 
-  // 1200x630 preview: the live sun, cover-fit, with a quiet wordmark.
-  function makePreview() {
-    const src = window.SONIFY_SUN && window.SONIFY_SUN.snapshot();
-    const W = 1200, H = 630;
-    const c = document.createElement('canvas');
-    c.width = W; c.height = H;
-    const g = c.getContext('2d');
-    g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
-    if (src && src.width && src.height) {
-      const k = Math.max(W / src.width, H / src.height) * (window.SONIFY_SUN.scale ? window.SONIFY_SUN.scale() : 1);
-      const dw = src.width * k, dh = src.height * k;
-      g.drawImage(src, (W - dw) / 2, (H - dh) / 2, dw, dh);
-    }
-    const grad = g.createLinearGradient(0, H * 0.7, 0, H);
-    grad.addColorStop(0, 'rgba(0,0,0,0)'); grad.addColorStop(1, 'rgba(0,0,0,0.65)');
-    g.fillStyle = grad; g.fillRect(0, H * 0.7, W, H * 0.3);
-    g.fillStyle = 'rgba(212,168,67,0.95)';
-    g.font = '600 26px "Space Mono", ui-monospace, monospace';
-    g.textBaseline = 'alphabetic';
-    g.fillText('SONIFY.NOW.AUDIO', 44, H - 40);
-    return c.toDataURL('image/jpeg', 0.82);
+  // Which pre-baked thumbnail to use: the half-second the sun video is showing right now.
+  const THUMB_COUNT = 246;
+  function currentFrame() {
+    const v = document.querySelector('.sun-video');
+    const t = v && Number.isFinite(v.currentTime) ? v.currentTime : 0;
+    return Math.max(0, Math.floor(t * 2)) % THUMB_COUNT;
   }
 
   let toastTimer = 0;
@@ -80,11 +65,10 @@
     try {
       const state = readState();
       if (!state.pattern) throw new Error('no pattern yet');
-      const image = makePreview();
       const res = await fetch('/api/beat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ state, image }),
+        body: JSON.stringify({ state, frame: currentFrame() }),
       });
       if (!res.ok) throw new Error('save failed ' + res.status);
       const { url } = await res.json();

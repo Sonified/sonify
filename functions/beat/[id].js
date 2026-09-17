@@ -11,7 +11,8 @@ export async function onRequestGet({ request, params, env }) {
 
   const origin = new URL(request.url).origin;
   const pageUrl = `${origin}/beat/${id}`;
-  const imgUrl = `${origin}/og/${id}.jpg`;
+  const frame = Number.isInteger(state.frame) && state.frame >= 0 && state.frame < 246 ? state.frame : 0;
+  const imgUrl = `${origin}/thumb/0171/${String(frame).padStart(3, '0')}.jpg`;
 
   // Before any page script runs: load this beat into the sequencer's saved settings,
   // and open on the Play the Sun page.
