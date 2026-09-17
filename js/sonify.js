@@ -260,6 +260,48 @@
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
   })();
 
+  // ===== 3d. Desktop: keep your place when the window is resized =====
+  // With mandatory scroll-snap and a last page taller than the screen, browsers can
+  // re-snap to the wrong page (often the bottom) while the window height changes.
+  // Remember the page in view + the offset inside it, and restore that after resizing.
+  (function holdScrollOnResize() {
+    if (document.documentElement.classList.contains('is-mobile')) return;
+    const root = document.documentElement;
+    const pages = () => Array.from(document.querySelectorAll('#pages > section[data-page]'));
+    let anchor = null, resizing = false, settleTimer = 0;
+    function capture() {
+      const y = window.scrollY;
+      let best = null;
+      for (const sec of pages()) { if (sec.offsetTop <= y + 2) best = sec; else break; }
+      if (best) anchor = { sec: best, offset: y - best.offsetTop };
+    }
+    function restore() {
+      if (!anchor) return;
+      const { sec, offset } = anchor;
+      const maxInside = Math.max(0, sec.offsetHeight - window.innerHeight);
+      const target = sec.offsetTop + Math.min(offset, maxInside);
+      root.style.scrollSnapType = 'none';
+      root.style.scrollBehavior = 'auto';
+      window.scrollTo(0, target);
+      if (resizing) return; // snapping stays off until the drag settles
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        root.style.scrollSnapType = '';
+        root.style.scrollBehavior = '';
+        window.scrollTo(0, target); // hold position after snapping is re-enabled
+      }));
+    }
+    window.addEventListener('scroll', () => { if (!resizing) capture(); }, { passive: true });
+    window.addEventListener('resize', updateFreeScroll);
+    if (window.ResizeObserver) new ResizeObserver(updateFreeScroll).observe(document.getElementById('pages') || document.body);
+    window.addEventListener('resize', () => {
+      if (!resizing) { resizing = true; root.style.scrollSnapType = 'none'; }
+      restore();
+      clearTimeout(settleTimer);
+      settleTimer = setTimeout(() => { resizing = false; restore(); }, 180);
+    });
+    capture();
+  })();
+
   // ===== 4. Hero scroll cue on load =====
   // Sonara only reveals the chevron after a Listen click (and then ~10s later).
   // A first-time viewer needs the "scroll down" cue without doing anything, so
