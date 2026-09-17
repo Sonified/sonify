@@ -41,16 +41,10 @@ window.SONIFY = {
     entries: {
       name:          'entry.1406118423',
       email:         'entry.1404109041',
-      under18:       'entry.866273264',
-      guardianName:  'entry.842371992',
-      guardianEmail: 'entry.1104510642',
       role:          'entry.1804815478',
       interests:     'entry.1609566717',
       message:       'entry.135140102',
     },
-    // Section path Google expects: 0 = first page, 1 = guardian, 2 = about you.
-    pageHistoryMinor: '0,1,2',
-    pageHistoryAdult: '0,2',
     // Optional fallback: a Formspree endpoint (https://formspree.io/f/xxxx). When set, it is used instead.
     formspree: '',
     email: 'robert@auralab.io',

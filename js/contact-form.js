@@ -1,6 +1,5 @@
 /* ============================================================
    Inline contact form (Work with Robert page)
-   - Under 18: reveals and requires the parent/guardian fields.
    - "Other" role: reveals and requires a short text field.
    - ?type=student|educator|corporate|researcher|other pre-selects the role.
    - Submits to the Google Form's formResponse endpoint (no redirect),
@@ -17,16 +16,11 @@
   const success = form.parentElement.querySelector('.cf-success');
   const status = form.querySelector('.cf-status');
   const submitBtn = form.querySelector('.cf-submit');
-  const guardian = form.querySelector('.cf-guardian');
   const roleOther = form.querySelector('.cf-other');
   const interestOther = form.querySelector('.cf-interest-other');
 
   // ----- conditional fields -----
   function syncConditionals() {
-    const minor = el.under18.value === 'Yes';
-    guardian.hidden = !minor;
-    guardian.querySelectorAll('input').forEach(i => { i.required = minor; if (!minor) clearError(i); });
-
     const other = form.querySelector('input[name="role"]:checked')?.dataset.type === 'other';
     roleOther.hidden = !other;
     el.roleOther.required = other;
@@ -65,7 +59,7 @@
       if (i.required && !v) bad(i);
       else if (i.type === 'email' && v && !EMAIL_RE.test(v)) bad(i);
     });
-    ['under18', 'role'].forEach(name => {
+    ['role'].forEach(name => {
       if (!form.querySelector(`input[name="${name}"]:checked`)) bad(form.querySelector(`input[name="${name}"]`));
     });
     return firstBad;
@@ -79,9 +73,6 @@
     return {
       name: f.name.value.trim(),
       email: f.email.value.trim(),
-      under18: f.under18.value,
-      guardianName: f.guardianName.value.trim(),
-      guardianEmail: f.guardianEmail.value.trim(),
       role: role ? role.value : '',
       roleOther: f.roleOther.value.trim(),
       interests,
@@ -95,17 +86,11 @@
     const b = new URLSearchParams();
     b.append(e.name, d.name);
     b.append(e.email, d.email);
-    b.append(e.under18, d.under18);
-    if (d.under18 === 'Yes') {
-      b.append(e.guardianName, d.guardianName);
-      b.append(e.guardianEmail, d.guardianEmail);
-    }
     b.append(e.role, d.role);
     if (d.role === '__other_option__') b.append(e.role + '.other_option_response', d.roleOther);
     d.interests.forEach(v => b.append(e.interests, v));
     if (d.interests.includes('__other_option__')) b.append(e.interests + '.other_option_response', d.interestsOther || 'Other');
     if (d.message) b.append(e.message, d.message);
-    b.append('pageHistory', d.under18 === 'Yes' ? cfg.pageHistoryMinor : cfg.pageHistoryAdult);
     b.append('fvv', '1');
     return b;
   }
@@ -123,8 +108,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({
-          name: d.name, email: d.email, under_18: d.under18,
-          guardian_name: d.guardianName, guardian_email: d.guardianEmail,
+          name: d.name, email: d.email,
           role: r.role, interests: r.interests, message: d.message,
         }),
       });
@@ -138,8 +122,7 @@
   function mailtoFallback(d) {
     const r = readable(d);
     const lines = [
-      `Name: ${d.name}`, `Email: ${d.email}`, `Under 18: ${d.under18}`,
-      d.under18 === 'Yes' ? `Parent/Guardian: ${d.guardianName} <${d.guardianEmail}>` : '',
+      `Name: ${d.name}`, `Email: ${d.email}`,
       `Describes me: ${r.role}`, r.interests ? `Curious about: ${r.interests}` : '',
       d.message ? `\n${d.message}` : '',
     ].filter(Boolean).join('\n');

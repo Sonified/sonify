@@ -29,7 +29,7 @@
     })();
   </script>
   <link rel="stylesheet" href="styles.css?v=1">
-  <link rel="stylesheet" href="sonify.css?v=37">
+  <link rel="stylesheet" href="sonify.css?v=38">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -292,25 +292,6 @@
           </div>
 
           <fieldset class="cf-group" data-required>
-            <legend class="cf-label">Are you under 18? <b>*</b></legend>
-            <div class="cf-chips">
-              <label class="cf-chip"><input type="radio" name="under18" value="Yes" required><span>Yes</span></label>
-              <label class="cf-chip"><input type="radio" name="under18" value="No"><span>No</span></label>
-            </div>
-          </fieldset>
-
-          <div class="cf-row cf-guardian" hidden>
-            <label class="cf-field">
-              <span class="cf-label">Parent/Guardian name <b>*</b></span>
-              <input type="text" name="guardianName" autocomplete="off">
-            </label>
-            <label class="cf-field">
-              <span class="cf-label">Parent/Guardian email <b>*</b></span>
-              <input type="email" name="guardianEmail" autocomplete="off" inputmode="email">
-            </label>
-          </div>
-
-          <fieldset class="cf-group" data-required>
             <legend class="cf-label">Which best describes you? <b>*</b></legend>
             <div class="cf-chips cf-chips-stack">
               <label class="cf-chip"><input type="radio" name="role" value="Student seeking 1-on-1 mentorship" data-type="student" required><span>Student seeking 1-on-1 mentorship</span></label>
@@ -379,12 +360,12 @@
 
   <!-- Page order + links. Classic script: runs before the modules below, so
        the DOM is in its final order before visuals/audio initialize. -->
-  <script src="js/pages.js?v=6"></script>
+  <script src="js/pages.js?v=7"></script>
   <script src="js/rays.js?v=9"></script>
   <script type="module" src="js/audio.js?v=10"></script>
   <script type="module" src="js/visuals.js?v=36"></script>
   <script type="module" src="js/main.js?v=42"></script>
-  <script src="js/contact-form.js?v=1"></script>
+  <script src="js/contact-form.js?v=2"></script>
   <script type="module" src="js/sonify.js?v=5"></script>
 </body>
 </html>
