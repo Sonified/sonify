@@ -42,10 +42,10 @@ import { getStemAnalyser, setStemFilter, setStemSpace, setStemTempoBend, setStem
     el.append(img, btn, label);
     el.classList.add('yt-ready');
 
-    function activate() {
+    function activate(autoplay = true) {
       if (el.querySelector('iframe')) return;
       const iframe = document.createElement('iframe');
-      iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`;
+      iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=${autoplay ? 1 : 0}&rel=0&modestbranding=1&playsinline=1`;
       iframe.title = title;
       iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
       iframe.allowFullscreen = true;
@@ -59,7 +59,19 @@ import { getStemAnalyser, setStemFilter, setStemSpace, setStemTempoBend, setStem
       el.classList.remove('yt-active');
     }
 
-    el.addEventListener('click', activate);
+    if (document.documentElement.classList.contains('is-mobile')) {
+      // Phones: no facade dance — iOS won't carry a tap's gesture into a freshly
+      // injected iframe (the "spinner then a second play button" trap). Instead
+      // the real player loads when its page scrolls into view, so one tap on
+      // YouTube's own button starts it. Scrolling away still tears it down.
+      const io = new IntersectionObserver(([en]) => {
+        if (en.isIntersecting) activate(false);
+        else deactivate();
+      }, { threshold: 0.2 });
+      io.observe(el.closest('.section') || el);
+    } else {
+      el.addEventListener('click', activate);
+    }
     el._deactivate = deactivate;
   }
 
