@@ -295,7 +295,14 @@
       if (!resizing) { resizing = true; root.style.scrollSnapType = 'none'; }
       restore();
       clearTimeout(settleTimer);
-      settleTimer = setTimeout(() => { resizing = false; restore(); }, 180);
+      settleTimer = setTimeout(() => {
+        resizing = false;
+        restore();
+        // Whatever happened, snapping goes back to the stylesheet once the resize settles.
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          if (!resizing) { root.style.scrollSnapType = ''; root.style.scrollBehavior = ''; }
+        }));
+      }, 180);
     });
     capture();
   })();
@@ -308,17 +315,22 @@
     const slugOf = sec => slugs[sec.dataset.page] || sec.dataset.page;
     const bySlug = new Map(pages.map(sec => [slugOf(sec), sec]));
 
+    // Jumps pause snapping briefly and ALWAYS hand it back to the stylesheet afterwards
+    // (clearing the inline style). Only the latest jump restores, so overlapping jumps
+    // during page load can't leave snapping switched off.
+    let jumpToken = 0;
     function jumpTo(slug) {
       const sec = bySlug.get(slug);
       if (!sec) return false;
-      const prevSnap = root.style.scrollSnapType, prevBehavior = root.style.scrollBehavior;
+      const token = ++jumpToken;
       root.style.scrollSnapType = 'none';
       root.style.scrollBehavior = 'auto';
       window.scrollTo(0, sec.offsetTop);
       requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (token !== jumpToken) return;
         window.scrollTo(0, sec.offsetTop); // again, after late layout (fonts, canvases)
-        root.style.scrollSnapType = prevSnap;
-        root.style.scrollBehavior = prevBehavior;
+        root.style.scrollSnapType = '';
+        root.style.scrollBehavior = '';
       }));
       return true;
     }
