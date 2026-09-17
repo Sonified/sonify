@@ -7,7 +7,7 @@
  *      on the "work with Robert" page.
  */
 
-import { getStemAnalyser } from './audio.js?v=11';
+import { getStemAnalyser } from './audio.js?v=12';
 
 (function () {
   'use strict';
@@ -468,8 +468,11 @@ import { getStemAnalyser } from './audio.js?v=11';
       if (synthLevel < 0.001) synthLevel = 0;
       playing += ((an ? 1 : 0) - playing) * 0.05;                                   // ~1s ease in/out
       if (playing < 0.001) playing = 0;
-      // base spin doubles while playing; the live level and hover multiply on top
-      const rate = (1 + 3 * smooth(hoverT)) * (1 + playing) * (1 + 1.5 * synthLevel);
+      // spin targets: 1x at rest, 3x while playing, hover eases toward 6x from
+      // wherever it is; the live synth level adds on top (capped at 8x below).
+      let rate = 1 + 2 * playing;                    // rest 1x -> playing 3x
+      rate += (6 - rate) * smooth(hoverT);           // hover -> 6x
+      rate *= (1 + 1.5 * synthLevel);
       try { if (Math.abs(v.playbackRate - rate) > 0.01) v.playbackRate = Math.min(8, rate); } catch (e) {}
     }
 
@@ -479,6 +482,12 @@ import { getStemAnalyser } from './audio.js?v=11';
     // this at the audible moment), so the beat radiates outward as dark rings.
     let kickWaveUntil = 0;
     window.SONIFY_ONKICK = () => { kickWaveUntil = performance.now() + 100; };
+    // ...and each hat brightens the rim injection for 100ms: a bright ring out.
+    let hatFlashUntil = 0, hatBoost = 1;
+    window.SONIFY_ONHAT = () => {
+      hatFlashUntil = performance.now() + 100;
+      hatBoost = 1.03 + Math.random() * 0.10;   // surface flares 3-13%, fresh each hat
+    };
     const gl = cv && cv.getContext('webgl2', { alpha: false, antialias: false, premultipliedAlpha: false });
     let fx = null;
     if (gl) {
@@ -509,6 +518,7 @@ uniform float uAmount;
 uniform float uMode;
 uniform float uBright;
 uniform float uSeed;
+uniform float uSunBoost;
 out vec4 frag;
 vec3 sun(vec2 px) {
   vec2 s = (px - uSunRect.xy) / uSunRect.z;
@@ -529,7 +539,8 @@ void main() {
     float gate = smoothstep(uRadius - 0.03, uRadius + 0.03, r);
     frag = vec4(max(hist, s * gate * uSeed), 1.0);
   } else {
-    frag = vec4(min(vec3(1.0), mix(s, max(hist, s), uAmount) * uBright), 1.0);
+    vec3 sb = s * uSunBoost;   // hat pulses flare the visible solar surface
+    frag = vec4(min(vec3(1.0), mix(sb, max(hist, sb), uAmount) * uBright), 1.0);
   }
 }`;
       const sh = (type, src) => {
@@ -545,7 +556,7 @@ void main() {
       g.useProgram(prog);
       g.bindVertexArray(g.createVertexArray());
       const u = {};
-      for (const n of ['uPrev', 'uSun', 'uRes', 'uSunRect', 'uZoom', 'uDecay', 'uRadius', 'uAmount', 'uMode', 'uBright', 'uSeed']) u[n] = g.getUniformLocation(prog, n);
+      for (const n of ['uPrev', 'uSun', 'uRes', 'uSunRect', 'uZoom', 'uDecay', 'uRadius', 'uAmount', 'uMode', 'uBright', 'uSeed', 'uSunBoost']) u[n] = g.getUniformLocation(prog, n);
       g.uniform1i(u.uPrev, 0);
       g.uniform1i(u.uSun, 1);
       g.pixelStorei(g.UNPACK_FLIP_Y_WEBGL, true);
@@ -592,15 +603,18 @@ void main() {
         // More feedback while the synth plays: trails linger longer and stream out faster.
         const L = synthLevel;
         g.uniform1f(u.uZoom, Math.pow(TRAIL.zoom + 0.9 * L, dt));
-        // While playing, trails keep most of their light per second (0.10 at rest -> 0.88 at full level),
+        // While playing, trails keep most of their light per second (0.10 at rest -> 0.92 at full level),
         // so they survive long enough to stream all the way to the card's edges.
-        g.uniform1f(u.uDecay, Math.pow(TRAIL.decay + (0.88 - TRAIL.decay) * L, dt));
+        g.uniform1f(u.uDecay, Math.pow(TRAIL.decay + (0.92 - TRAIL.decay) * L, dt));
         g.uniform1f(u.uRadius, TRAIL.radius);
         g.uniform1f(u.uAmount, Math.min(1, TRAIL.amount + 0.3 * synthLevel));
-        g.uniform1f(u.uBright, 1 + 0.6 * L);   // brightness boost while the synth plays   // shines a little more when the synth plays
+        g.uniform1f(u.uBright, 1 + 0.6 * L);   // brightness boost while the synth plays
         // Kick wave: each kick closes the seed injection for a moment, carving a
-        // dark ring at the rim that rides the flow outward.
-        g.uniform1f(u.uSeed, performance.now() < kickWaveUntil ? 0.0 : 1.0);
+        // dark ring at the rim that rides the flow outward. Hats push it the other
+        // way: a brighter rim for 100ms becomes a bright ring riding the same flow.
+        const nowMs = performance.now();
+        g.uniform1f(u.uSeed, nowMs < kickWaveUntil ? 0.0 : (nowMs < hatFlashUntil ? 1.5 : 1.0));
+        g.uniform1f(u.uSunBoost, nowMs < hatFlashUntil ? hatBoost : 1.0);
         g.viewport(0, 0, W, H);
         g.bindFramebuffer(g.FRAMEBUFFER, pong.fbo);
         g.uniform1f(u.uMode, 0);

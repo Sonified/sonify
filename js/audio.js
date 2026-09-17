@@ -582,6 +582,10 @@ function seqTriggerStep(pat) {
     src.playbackRate.value = 2.2 + Math.random() * 1.3;
     const g = seqAc.createGain();
     g.gain.value = 0.2;
+    // Visual hook: the Meditate sun brightens for a moment on each hat (js/sonify.js).
+    if (typeof window !== 'undefined' && window.SONIFY_ONHAT) {
+      setTimeout(window.SONIFY_ONHAT, Math.max(0, (t - seqAc.currentTime) * 1000));
+    }
     src.connect(g);
     g.connect(seqMaster);
     src.start(t);
