@@ -789,11 +789,11 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 
 /* Phones: hero dissolves into the starfield instead of ending on a hard line */
 .is-mobile #hero {
-  background: linear-gradient(to bottom, var(--bg) 0%, var(--bg) 84%, rgba(6, 6, 8, 0) 100%);
+  background: linear-gradient(to bottom, var(--bg) 0%, var(--bg) 94%, rgba(6, 6, 8, 0) 100%);
 }
 .is-mobile #hero-canvas {
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 84%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0%, #000 84%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 94%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 94%, transparent 100%);
 }
 
 /* Phones: page gaps 40% tighter (was 9.5rem top / 8.5rem bottom) */
@@ -802,3 +802,6 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 
 /* Phones: no static glow wash on Play the Sun either (starfield only) */
 .is-mobile .music-bg { display: none !important; }
+
+/* Phones: email centered under the Start a conversation button */
+.is-mobile .wwr-email { align-self: center; text-align: center; }
