@@ -1365,10 +1365,16 @@ html:not(.is-mobile) #contact .wwr-content { transform: translateY(-5px); }
 .is-mobile .seq-octave { margin-left: 0.22rem; font-size: 0.53em; padding: 0.08rem 0.28rem; }
 .is-mobile .seq-tempo { margin-left: 0.22rem; }
 .is-mobile .seq-mode { width: 12ch; }
-.is-mobile .seq-bpm-num { width: 4.5ch; }
-.is-mobile .seq-bpm-btn { width: 2.4ch; }
+.is-mobile .seq-bpm-num { width: 4.5ch; height: 1.5rem; }
+.is-mobile .seq-bpm-btn { width: 1.5rem; height: 1.5rem; padding: 0; }   /* square, tappable */
 
 /* Phones: Meditate joins the instrument stack — no 'Breathe' label on top, and
    the sun sits the same 1.25rem gap below Solar Synth as between the cards */
 .is-mobile .meditate-card::before { content: none; }
 .is-mobile .meditate-card { margin-top: 0; }
+
+/* Phones: Listen to Space gets 10% more headroom both ways (neighbors were peeking in) */
+.is-mobile #education { padding-top: 9.87rem; padding-bottom: 9.63rem; }
+
+/* Phones: less air between the Meditate sun and the Work with Robert page */
+.is-mobile .meditate-card { margin-bottom: 3rem; }
