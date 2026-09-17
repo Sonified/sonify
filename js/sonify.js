@@ -241,6 +241,24 @@
     sync();
   })();
 
+  // ===== 3c. Phones: golden hour waveform band centered behind the sample pack card =====
+  (function waveBehindSamplePack() {
+    if (!document.documentElement.classList.contains('is-mobile')) return;
+    const wave = document.getElementById('cs-canvas');
+    const card = document.querySelector('[data-link="samplePack"]');
+    const section = wave && wave.closest('.section');
+    if (!wave || !card || !section) return;
+    const place = () => {
+      const top = card.getBoundingClientRect().top - section.getBoundingClientRect().top
+        + card.offsetHeight / 2 - wave.offsetHeight / 2;
+      wave.style.top = Math.round(top) + 'px';
+    };
+    place();
+    window.addEventListener('resize', place);
+    if (window.ResizeObserver) new ResizeObserver(place).observe(section);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+  })();
+
   // ===== 4. Hero scroll cue on load =====
   // Sonara only reveals the chevron after a Listen click (and then ~10s later).
   // A first-time viewer needs the "scroll down" cue without doing anything, so

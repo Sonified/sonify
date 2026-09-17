@@ -814,3 +814,15 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 
 /* Phones: 30% more room above Listen to Space (6.27rem -> 8.15rem) */
 .is-mobile #education { padding-top: 8.15rem; }
+
+/* Phones: taller waveform (110px -> 143px); wavetable list floats above the card instead of being clipped */
+.is-mobile .synth-visual { height: 143px !important; overflow: visible; }
+.is-mobile .instrument-card:has(.synth-visual) { overflow: visible; position: relative; z-index: 5; }
+.is-mobile .synth-visual #synth-wave-canvas { border-radius: 12px 12px 0 0; }
+.is-mobile .wt-list { z-index: 100; max-height: 60vh; overflow-y: auto; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7); }
+
+/* Phones: golden hour waveform is a band behind the Solar Sample Pack card (top set by js/sonify.js) */
+.is-mobile #cs-canvas { inset: auto; left: 0; width: 100%; height: 240px; top: 50%; }
+/* Phones: Rolling Stone card first, Solar Sample Pack second */
+.is-mobile .pg-cards .pg-card-press { order: 1; }
+.is-mobile .pg-cards [data-link="samplePack"] { order: 2; }
