@@ -88,8 +88,18 @@ missing, a text wordmark shows in its place automatically:
 
 ## Deploy
 
-GitHub Pages from `main`, root. `CNAME` is `sonify.now.audio`; add a CNAME
-DNS record pointing `sonify` at `<user>.github.io`.
+Hosted on **Cloudflare Pages** (project `sonify`). A git push does not deploy.
+
+```bash
+./tools/deploy.sh      # builds dist/ and deploys (functions/ included)
+```
+
+Server pieces (Pages Functions, R2 bucket `sonify-beats`):
+
+- `POST /api/beat` saves a shared beat (sequencer state + sun snapshot). Shares are permanent.
+- `/beat/<id>` opens the site with that beat loaded and its own link preview
+- `/og/<id>.jpg` is the preview image
+- `/video/<name>` streams video from R2 `media/` with byte ranges (needed for iPhone)
 
 ## Files
 
