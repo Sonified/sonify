@@ -93,7 +93,10 @@ window.SONIFY = {
   if (isPhone) {
     // Phones: starfield stays a fixed layer behind every page; no spectrum bars.
     document.getElementById('spectrum-canvas')?.remove();
-    if (cfg.MOBILE && !cfg.MOBILE.blobs) document.getElementById('vision-canvas')?.remove();
+    if (cfg.MOBILE && !cfg.MOBILE.blobs) {
+      document.getElementById('vision-canvas')?.remove();
+      document.querySelector('#vision .vision-bg')?.remove(); // its static glow wash too
+    }
   } else {
     // Desktop: starfield lives inside the Listen to Space page, as in Sonara.
     const stars = document.getElementById('edu-canvas');
