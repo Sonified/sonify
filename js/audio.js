@@ -491,6 +491,7 @@ let seqInterval = null;
 let seqStep = 0;
 let seqAc = null;
 let seqMaster = null;
+let seqFilterNode = null;   // master lowpass: the Meditate sun's hover filter
 let seqSynthBus = null;
 let seqRevG = null;
 let seqConv = null;
@@ -541,6 +542,31 @@ function updateDelayRouting() {
   } else {
     try { seqSynthBus.disconnect(seqDelayNode); } catch(e) {}
   }
+}
+
+// The Meditate sun's space control: -1 = dry (delay/reverb faded out),
+// 0 = standard sends, +1 = extra spacious (wet up ~2x, delay feeds back longer).
+let stemSpaceX = 0;
+function applyStemSpace() {
+  if (!seqAc) return;
+  const t = seqAc.currentTime;
+  const scale = stemSpaceX < 0 ? 1 + stemSpaceX : 1 + 1.2 * stemSpaceX;
+  if (seqRevG) seqRevG.gain.setTargetAtTime(0.55 * scale, t, 0.08);
+  if (seqDelayGain) seqDelayGain.gain.setTargetAtTime(0.35 * scale, t, 0.08);
+  if (seqDelayFeedback) seqDelayFeedback.gain.setTargetAtTime(0.4 + 0.15 * Math.max(0, stemSpaceX), t, 0.08);
+}
+export function setStemSpace(x) {
+  stemSpaceX = Math.min(1, Math.max(-1, +x || 0));
+  applyStemSpace();
+}
+
+// The Meditate sun's hover filter: amount 0 = wide open, 1 = dark (~220Hz).
+// setTargetAtTime makes every move a slide, never a jump.
+export function setStemFilter(amount) {
+  if (!seqFilterNode || !seqAc) return;
+  const a = Math.min(1, Math.max(0, +amount || 0));
+  const f = 18000 * Math.pow(220 / 18000, a);   // exponential sweep feels linear to the ear
+  seqFilterNode.frequency.setTargetAtTime(f, seqAc.currentTime, 0.08);
 }
 
 export function setSeqLoop(val) {
@@ -625,7 +651,17 @@ async function stemMusicSound(ac, master, prePattern) {
 
   // Set up persistent audio graph (reused across restarts)
   seqAc = ac;
-  seqMaster = master;
+  // Master lowpass (wide open by default). Everything below routes through it,
+  // so the Meditate sun's hover can sweep the whole beat darker.
+  if (!seqFilterNode) {
+    seqFilterNode = ac.createBiquadFilter();
+    seqFilterNode.type = 'lowpass';
+    seqFilterNode.frequency.value = 18500;
+    seqFilterNode.Q.value = 4;   // resonant sweep — the cutoff sings a little
+  }
+  try { seqFilterNode.disconnect(); } catch(e) {}
+  seqFilterNode.connect(master);
+  seqMaster = seqFilterNode;
 
   if (!seqRevG) {
     // Chain: synthBus → master (dry)
@@ -633,7 +669,7 @@ async function stemMusicSound(ac, master, prePattern) {
     // Delay feeds INTO reverb so echoes get the wash.
     seqSynthBus = ac.createGain();
     seqSynthBus.gain.value = 1;
-    seqSynthBus.connect(master);                   // dry path always on
+    seqSynthBus.connect(seqMaster);                // dry path always on
 
     // Delay: synthBus → delay → feedback → delayGain
     seqDelayNode = ac.createDelay(1.0);
@@ -645,7 +681,7 @@ async function stemMusicSound(ac, master, prePattern) {
     seqDelayNode.connect(seqDelayFeedback);
     seqDelayFeedback.connect(seqDelayNode);
     seqDelayNode.connect(seqDelayGain);
-    seqDelayGain.connect(master);                  // delay dry out
+    seqDelayGain.connect(seqMaster);               // delay dry out
     if (seqDelayOn) seqSynthBus.connect(seqDelayNode);
 
     // Reverb: conv → revG → master (last in chain)
@@ -654,13 +690,14 @@ async function stemMusicSound(ac, master, prePattern) {
     seqRevG = ac.createGain();
     seqRevG.gain.value = 0.55;
     seqConv.connect(seqRevG);
-    seqRevG.connect(master);
+    seqRevG.connect(seqMaster);
     // Feed both dry synth AND delay output into reverb
     if (seqReverbOn) {
       seqSynthBus.connect(seqConv);
       seqDelayGain.connect(seqConv);
     }
   }
+  applyStemSpace();   // a fresh graph honors the sun's current mouse position
 
   // Load samples
   seqKickBuf = await loadBuffer('audio/mp3/Kick_Processed_Final__WIND_BGSE_z_2007_08_13_LFEvent_CLEANED_ISOLATED_SHORT.mp3');

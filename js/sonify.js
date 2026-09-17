@@ -7,7 +7,7 @@
  *      on the "work with Robert" page.
  */
 
-import { getStemAnalyser } from './audio.js?v=12';
+import { getStemAnalyser, setStemFilter, setStemSpace } from './audio.js?v=13';
 
 (function () {
   'use strict';
@@ -427,9 +427,35 @@ import { getStemAnalyser } from './audio.js?v=12';
     // ---- hover: speed 1x -> 4x and size REST -> FULL, eased ----
     const SCALE_REST = 1.26, SCALE_FULL = 1.4, RAMP_MS = 500;
     let hoverT = 0, hoverTarget = 0, lastTs = 0;
+    let filtT = 0, filtTarget = 0;   // mouse height over the video: top = open, bottom = dark
+    let spinT = 0, spinTarget = 0;   // mouse across the video: slows left, speeds right
+    let spaceT = 0, spaceTarget = 0; // mouse across the video: dry left, spacious right
     if (card && matchMedia('(hover: hover)').matches) {
       card.addEventListener('mouseenter', () => { hoverTarget = 1; kick(); });
-      card.addEventListener('mouseleave', () => { hoverTarget = 0; kick(); });
+      card.addEventListener('mouseleave', () => { hoverTarget = 0; filtTarget = 0; kick(); });
+      // Only the video itself is the filter surface: top of the sun = open,
+      // bottom of the sun = filtered. The rest of the card leaves it open.
+      const surf = box || v;
+      surf.addEventListener('mousemove', e => {
+        const r = surf.getBoundingClientRect();
+        filtTarget = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+        const xn = Math.min(1, Math.max(-1, ((e.clientX - r.left) / r.width) * 2 - 1));
+        spinTarget = xn < 0 ? xn * 2 : xn * 4;   // left up to -2x, right up to +4x
+        spaceTarget = xn;                        // left dry, right spacious (delay + reverb)
+        kick();
+      });
+      surf.addEventListener('mouseleave', () => { filtTarget = 0; spinTarget = 0; spaceTarget = 0; kick(); });
+    }
+    function stepFilter(dt) {
+      const k = Math.min(1, dt * 6);
+      spinT += (spinTarget - spinT) * k;
+      const nextSpace = spaceT + (spaceTarget - spaceT) * k;
+      if (Math.abs(nextSpace - spaceT) > 0.0005) { spaceT = nextSpace; setStemSpace(spaceT); }
+      const next = filtT + (filtTarget - filtT) * k;
+      if (Math.abs(next - filtT) < 0.0005 && Math.abs(filtTarget - filtT) < 0.001) return false;
+      filtT = next;
+      setStemFilter(filtT);   // audio LPF slides with the mouse
+      return true;
     }
 
     // ---- clicking through to meditatewiththesun.com (new tab) pauses the beat ----
@@ -473,6 +499,7 @@ import { getStemAnalyser } from './audio.js?v=12';
       let rate = 1 + 2 * playing;                    // rest 1x -> playing 3x
       rate += (6 - rate) * smooth(hoverT);           // hover -> 6x
       rate *= (1 + 1.5 * synthLevel);
+      rate = Math.max(0.25, rate + spinT);           // mouse X trims the spin -2x..+4x
       try { if (Math.abs(v.playbackRate - rate) > 0.01) v.playbackRate = Math.min(8, rate); } catch (e) {}
     }
 
@@ -608,7 +635,7 @@ void main() {
         g.uniform1f(u.uDecay, Math.pow(TRAIL.decay + (0.92 - TRAIL.decay) * L, dt));
         g.uniform1f(u.uRadius, TRAIL.radius);
         g.uniform1f(u.uAmount, Math.min(1, TRAIL.amount + 0.3 * synthLevel));
-        g.uniform1f(u.uBright, 1 + 0.6 * L);   // brightness boost while the synth plays
+        g.uniform1f(u.uBright, (1 + 0.6 * L) * (1 - 0.35 * filtT));   // synth swell, dimmed as the filter closes
         // Kick wave: each kick closes the seed injection for a moment, carving a
         // dark ring at the rim that rides the flow outward. Hats push it the other
         // way: a brighter rim for 100ms becomes a bright ring riding the same flow.
@@ -635,6 +662,7 @@ void main() {
       const dt = lastTs ? Math.min(0.1, (ts - lastTs) / 1000) : 1 / 60;
       lastTs = ts;
       stepHover(dt * 1000);
+      stepFilter(dt);
       stepSynth();
       if (fx) fx.draw(dt);
       else v.style.transform = `scale(${scaleNow()})`;
