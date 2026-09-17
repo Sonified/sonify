@@ -45,7 +45,7 @@ export async function onRequestGet({ request, params, env }) {
   const page = await env.ASSETS.fetch(new URL('/', request.url));
   const out = new HTMLRewriter()
     .on('head', { element(el) { el.prepend(`<base href="/">${loader}`, { html: true }); el.append(metaHtml, { html: true }); } })
-    .on('title', { element(el) { el.setInnerContent(TITLE); } })
+    // The tab keeps the site's own <title>; the share text lives only in og:/twitter: tags.
     .on('meta[property^="og:"], meta[name^="twitter:"], meta[name="description"]', { element(el) { el.remove(); } })
     .transform(page);
   const headers = new Headers(out.headers);
