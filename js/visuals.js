@@ -6224,7 +6224,7 @@ function initCSCanvas() {
   const CS_SPEED_MULT_MAX = 52; // louder moments should rip much faster
   const CS_FREQ_MULT = 1.75; // stable higher-frequency waveform shape
   const vis = trackVisibility('citizen-science');
-  const CS_ORBS = !document.documentElement.classList.contains('is-mobile');
+  const CS_ORBS = false; // waveform line only (dots and rings removed on every device)
 
   // Living discovery orbs — drift, fade in/out, respawn
   const MAX_ORBS = 6;
@@ -6630,7 +6630,7 @@ function initSynthWave() {
 
     // Glow layer
     const glowAlpha = 0.06 + liveBlend * 0.14;
-    c.strokeStyle = `rgba(232, 145, 60, ${glowAlpha})`;
+    c.strokeStyle = `rgba(218, 158, 18, ${glowAlpha})`;
     c.lineWidth = 5 + liveBlend * 3;
     c.beginPath();
     for (let x = 0; x < w; x++) {
@@ -6640,7 +6640,7 @@ function initSynthWave() {
     c.stroke();
 
     // Sharp line
-    c.strokeStyle = `rgba(232, 145, 60, ${0.28 + liveBlend * 0.62})`;
+    c.strokeStyle = `rgba(218, 158, 18, ${0.28 + liveBlend * 0.62})`;
     c.lineWidth = 1.5 + liveBlend * 0.5;
     c.beginPath();
     for (let x = 0; x < w; x++) {
@@ -6653,7 +6653,7 @@ function initSynthWave() {
     c.lineTo(w, centerY);
     c.lineTo(0, centerY);
     c.closePath();
-    c.fillStyle = `rgba(232, 145, 60, ${0.025 + liveBlend * 0.055})`;
+    c.fillStyle = `rgba(218, 158, 18, ${0.025 + liveBlend * 0.055})`;
     c.fill();
 
   }

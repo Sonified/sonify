@@ -7,6 +7,8 @@
  *      on the "work with Robert" page.
  */
 
+import { getStemAnalyser } from './audio.js?v=10';
+
 (function () {
   'use strict';
 
@@ -290,7 +292,21 @@
         window.scrollTo(0, target); // hold position after snapping is re-enabled
       }));
     }
-    window.addEventListener('scroll', () => { if (!resizing) capture(); }, { passive: true });
+    // Natural scrolling inside a page taller than the screen (the Work with page): snapping is
+    // off once you're a little way in, and back on in the band near its top, so scrolling up
+    // still stops at the page's top edge (#contact has scroll-snap-stop: always).
+    const FREE_AFTER_PX = 48;
+    function updateFreeScroll() {
+      const y = window.scrollY, vh = window.innerHeight;
+      let free = false;
+      for (const sec of pages()) {
+        if (sec.offsetHeight <= vh + 4) continue;
+        const top = sec.offsetTop, bottom = top + sec.offsetHeight;
+        if (y >= top + FREE_AFTER_PX && y + vh <= bottom + 2) { free = true; break; }
+      }
+      root.classList.toggle('free-scroll', free);
+    }
+    window.addEventListener('scroll', () => { if (!resizing) capture(); updateFreeScroll(); }, { passive: true });
     window.addEventListener('resize', () => {
       if (!resizing) { resizing = true; root.style.scrollSnapType = 'none'; }
       restore();
@@ -373,6 +389,260 @@
       const slug = decodeURIComponent(location.hash.slice(1));
       if (bySlug.has(slug)) { current = slug; jumpTo(slug); }
     });
+  })();
+
+  // ===== 3f. Meditate card: looping sun video with a solar-wind feedback glow =====
+  // The video plays hidden; a WebGL2 canvas draws the sun plus a feedback loop
+  // (last frame zoomed a touch outward and faded, max'd with the live sun), ported
+  // from meditatewiththesun.com. Clipped by the card. Hover: 4x speed and full size.
+  // No WebGL2: the plain video shows instead.
+  (function sunLoop() {
+    const v = document.querySelector('.sun-video');
+    if (!v) return;
+    const box = v.closest('.meditate-visual');
+    const card = v.closest('.meditate-card');
+    const cv = box && box.querySelector('.sun-trails');
+    const start = parseFloat(v.dataset.start || '0') || 0;
+    v.muted = true;
+
+    // ---- start point ----
+    let seeked = false;
+    const seekToStart = () => {
+      if (seeked || !(v.duration > start)) return;
+      seeked = true;
+      try { v.currentTime = start; } catch (e) {}
+    };
+    v.addEventListener('loadedmetadata', seekToStart);
+    if (v.readyState >= 1) seekToStart();
+
+    // ---- preload: once the rest of the page has loaded, start buffering the video
+    // in the background (from the start point, so it's ready when the card is reached) ----
+    const startBuffering = () => {
+      const go = () => { v.preload = 'auto'; seekToStart(); };
+      if ('requestIdleCallback' in window) requestIdleCallback(go, { timeout: 2000 }); else setTimeout(go, 300);
+    };
+    if (document.readyState === 'complete') startBuffering();
+    else window.addEventListener('load', startBuffering, { once: true });
+
+    // ---- hover: speed 1x -> 4x and size REST -> FULL, eased ----
+    const SCALE_REST = 1.26, SCALE_FULL = 1.4, RAMP_MS = 500;
+    let hoverT = 0, hoverTarget = 0, lastTs = 0;
+    if (card && matchMedia('(hover: hover)').matches) {
+      card.addEventListener('mouseenter', () => { hoverTarget = 1; kick(); });
+      card.addEventListener('mouseleave', () => { hoverTarget = 0; kick(); });
+    }
+    const smooth = t => t * t * (3 - 2 * t);
+    function stepHover(dt) {
+      if (hoverT === hoverTarget) return false;
+      const d = dt / RAMP_MS;
+      hoverT = hoverTarget > hoverT ? Math.min(hoverTarget, hoverT + d) : Math.max(hoverTarget, hoverT - d);
+      return true;
+    }
+    // Playing lifts the resting size halfway to the hover size; hover still goes to full.
+    const scaleNow = () => {
+      const rest = SCALE_REST + ((SCALE_REST + SCALE_FULL) / 2 - SCALE_REST) * playing;
+      return (rest + (SCALE_FULL - rest) * smooth(hoverT)) * (1 + 0.08 * synthLevel);
+    };
+
+    // ---- the Solar Synth drives the sun: its output level speeds the sun up and swells it ----
+    let synthLevel = 0;
+    let playing = 0;                       // eases 0 -> 1 while the sequencer plays
+    const synthBuf = new Uint8Array(512);
+    function stepSynth() {
+      const an = getStemAnalyser();
+      let target = 0;
+      if (an) {
+        const buf = synthBuf.length === an.fftSize ? synthBuf : new Uint8Array(an.fftSize);
+        an.getByteTimeDomainData(buf);
+        let sum = 0;
+        for (let i = 0; i < buf.length; i++) { const x = (buf[i] - 128) / 128; sum += x * x; }
+        target = Math.min(1, Math.sqrt(sum / buf.length) * 5);
+      }
+      synthLevel += (target - synthLevel) * (target > synthLevel ? 0.35 : 0.06);  // fast attack, slow release
+      if (synthLevel < 0.001) synthLevel = 0;
+      playing += ((an ? 1 : 0) - playing) * 0.05;                                   // ~1s ease in/out
+      if (playing < 0.001) playing = 0;
+      // base spin doubles while playing; the live level and hover multiply on top
+      const rate = (1 + 3 * smooth(hoverT)) * (1 + playing) * (1 + 1.5 * synthLevel);
+      try { if (Math.abs(v.playbackRate - rate) > 0.01) v.playbackRate = Math.min(8, rate); } catch (e) {}
+    }
+
+    // ---- feedback renderer ----
+    const TRAIL = { zoom: 1.995, decay: 0.10, radius: 0.77, amount: 0.55 };   // per-second dials
+    const gl = cv && cv.getContext('webgl2', { alpha: false, antialias: false, premultipliedAlpha: false });
+    let fx = null;
+    if (gl) {
+      try { fx = makeTrails(gl); } catch (e) { console.warn('[sun] trails off:', e.message); fx = null; }
+    }
+    box && box.classList.toggle('trails-on', !!fx);
+    if (!fx) v.style.transform = `scale(${SCALE_REST})`;
+
+    function makeTrails(g) {
+      const VS = `#version 300 es
+out vec2 vUV;
+void main() {
+  vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));
+  vUV = p;
+  gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+}`;
+      const FS = `#version 300 es
+precision mediump float;
+in vec2 vUV;
+uniform sampler2D uPrev;
+uniform sampler2D uSun;
+uniform vec2 uRes;
+uniform vec3 uSunRect;
+uniform float uZoom;
+uniform float uDecay;
+uniform float uRadius;
+uniform float uAmount;
+uniform float uMode;
+uniform float uBright;
+out vec4 frag;
+vec3 sun(vec2 px) {
+  vec2 s = (px - uSunRect.xy) / uSunRect.z;
+  if (s.x < 0.0 || s.x > 1.0 || s.y < 0.0 || s.y > 1.0) return vec3(0.0);
+  float r = length(s - 0.5) * 2.0;
+  float win = 1.0 - smoothstep(0.9, 0.995, r);
+  return texture(uSun, s).rgb * win;
+}
+void main() {
+  vec2 px = vUV * uRes;
+  vec2 c = uRes * 0.5;
+  float r = length(px - c) / (uSunRect.z * 0.5);
+  vec2 q = (c + (px - c) / uZoom) / uRes;
+  vec3 prev = (q.x < 0.0 || q.x > 1.0 || q.y < 0.0 || q.y > 1.0) ? vec3(0.0) : texture(uPrev, q).rgb;
+  vec3 hist = prev * uDecay;
+  vec3 s = sun(px);
+  if (uMode < 0.5) {
+    float gate = smoothstep(uRadius - 0.03, uRadius + 0.03, r);
+    frag = vec4(max(hist, s * gate), 1.0);
+  } else {
+    frag = vec4(min(vec3(1.0), mix(s, max(hist, s), uAmount) * uBright), 1.0);
+  }
+}`;
+      const sh = (type, src) => {
+        const o = g.createShader(type); g.shaderSource(o, src); g.compileShader(o);
+        if (!g.getShaderParameter(o, g.COMPILE_STATUS)) throw new Error(g.getShaderInfoLog(o));
+        return o;
+      };
+      const prog = g.createProgram();
+      g.attachShader(prog, sh(g.VERTEX_SHADER, VS));
+      g.attachShader(prog, sh(g.FRAGMENT_SHADER, FS));
+      g.linkProgram(prog);
+      if (!g.getProgramParameter(prog, g.LINK_STATUS)) throw new Error(g.getProgramInfoLog(prog));
+      g.useProgram(prog);
+      g.bindVertexArray(g.createVertexArray());
+      const u = {};
+      for (const n of ['uPrev', 'uSun', 'uRes', 'uSunRect', 'uZoom', 'uDecay', 'uRadius', 'uAmount', 'uMode', 'uBright']) u[n] = g.getUniformLocation(prog, n);
+      g.uniform1i(u.uPrev, 0);
+      g.uniform1i(u.uSun, 1);
+      g.pixelStorei(g.UNPACK_FLIP_Y_WEBGL, true);
+      const tex = (w, h) => {
+        const t = g.createTexture();
+        g.bindTexture(g.TEXTURE_2D, t);
+        g.texImage2D(g.TEXTURE_2D, 0, g.RGBA, w, h, 0, g.RGBA, g.UNSIGNED_BYTE, null);
+        g.texParameteri(g.TEXTURE_2D, g.TEXTURE_MIN_FILTER, g.LINEAR);
+        g.texParameteri(g.TEXTURE_2D, g.TEXTURE_MAG_FILTER, g.LINEAR);
+        g.texParameteri(g.TEXTURE_2D, g.TEXTURE_WRAP_S, g.CLAMP_TO_EDGE);
+        g.texParameteri(g.TEXTURE_2D, g.TEXTURE_WRAP_T, g.CLAMP_TO_EDGE);
+        return t;
+      };
+      const sunTex = tex(1, 1);
+      let W = 0, H = 0, ping = null, pong = null;
+      function resize() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const w = Math.max(2, Math.round(box.clientWidth * dpr));
+        const h = Math.max(2, Math.round(box.clientHeight * dpr));
+        if (w === W && h === H) return;
+        W = w; H = h; cv.width = W; cv.height = H;
+        for (const o of [ping, pong]) if (o) { g.deleteTexture(o.tex); g.deleteFramebuffer(o.fbo); }
+        const make = () => {
+          const t = tex(W, H), fbo = g.createFramebuffer();
+          g.bindFramebuffer(g.FRAMEBUFFER, fbo);
+          g.framebufferTexture2D(g.FRAMEBUFFER, g.COLOR_ATTACHMENT0, g.TEXTURE_2D, t, 0);
+          g.clearColor(0, 0, 0, 1); g.clear(g.COLOR_BUFFER_BIT);
+          return { tex: t, fbo };
+        };
+        ping = make(); pong = make();
+        g.bindFramebuffer(g.FRAMEBUFFER, null);
+        g.uniform2f(u.uRes, W, H);
+      }
+      function draw(dt) {
+        resize();
+        if (v.readyState < 2) return;
+        const side = Math.min(W, H) * scaleNow();
+        g.uniform3f(u.uSunRect, (W - side) / 2, (H - side) / 2, side);
+        g.activeTexture(g.TEXTURE1);
+        g.bindTexture(g.TEXTURE_2D, sunTex);
+        g.texImage2D(g.TEXTURE_2D, 0, g.RGBA, g.RGBA, g.UNSIGNED_BYTE, v);
+        g.activeTexture(g.TEXTURE0);
+        g.bindTexture(g.TEXTURE_2D, ping.tex);
+        // More feedback while the synth plays: trails linger longer and stream out faster.
+        const L = synthLevel;
+        g.uniform1f(u.uZoom, Math.pow(TRAIL.zoom + 0.9 * L, dt));
+        // While playing, trails keep most of their light per second (0.10 at rest -> 0.88 at full level),
+        // so they survive long enough to stream all the way to the card's edges.
+        g.uniform1f(u.uDecay, Math.pow(TRAIL.decay + (0.88 - TRAIL.decay) * L, dt));
+        g.uniform1f(u.uRadius, TRAIL.radius);
+        g.uniform1f(u.uAmount, Math.min(1, TRAIL.amount + 0.3 * synthLevel));
+        g.uniform1f(u.uBright, 1 + 0.6 * L);   // brightness boost while the synth plays   // shines a little more when the synth plays
+        g.viewport(0, 0, W, H);
+        g.bindFramebuffer(g.FRAMEBUFFER, pong.fbo);
+        g.uniform1f(u.uMode, 0);
+        g.drawArrays(g.TRIANGLES, 0, 3);
+        g.bindFramebuffer(g.FRAMEBUFFER, null);
+        g.uniform1f(u.uMode, 1);
+        g.drawArrays(g.TRIANGLES, 0, 3);
+        [ping, pong] = [pong, ping];
+      }
+      // Snapshot of the picture as it is right now (drawn and read in the same task,
+      // so no preserveDrawingBuffer is needed). dt = 0 leaves the trail history untouched.
+      function snapshot() { draw(0); return cv; }
+      return { draw, snapshot };
+    }
+
+    // For the Share button: a canvas holding the live sun (with trails when available).
+    window.SONIFY_SUN = {
+      snapshot() {
+        if (fx) return fx.snapshot();
+        if (v.readyState >= 2) {
+          const c = document.createElement('canvas');
+          c.width = v.videoWidth; c.height = v.videoHeight;
+          c.getContext('2d').drawImage(v, 0, 0);
+          return c;
+        }
+        return null;
+      },
+      scale: () => (fx ? 1 : scaleNow()),
+    };
+
+    // ---- run only while visible ----
+    let visible = false, raf = 0;
+    function frame(ts) {
+      raf = 0;
+      if (!visible) return;
+      const dt = lastTs ? Math.min(0.1, (ts - lastTs) / 1000) : 1 / 60;
+      lastTs = ts;
+      stepHover(dt * 1000);
+      stepSynth();
+      if (fx) fx.draw(dt);
+      else v.style.transform = `scale(${scaleNow()})`;
+      raf = requestAnimationFrame(frame);
+    }
+    function kick() { if (visible && !raf) { lastTs = 0; raf = requestAnimationFrame(frame); } }
+    const tryPlay = () => { const p = v.play(); if (p && p.catch) p.catch(() => {}); };
+    const setVisible = on => {
+      visible = on && !document.hidden;
+      if (visible) { tryPlay(); kick(); } else { v.pause(); }
+    };
+    if ('IntersectionObserver' in window) {
+      let inView = false;
+      new IntersectionObserver(([en]) => { inView = en.isIntersecting; setVisible(inView); }, { threshold: 0.05 }).observe(box || v);
+      document.addEventListener('visibilitychange', () => setVisible(inView));
+    } else {
+      setVisible(true);
+    }
   })();
 
   // ===== 4. Hero scroll cue on load =====

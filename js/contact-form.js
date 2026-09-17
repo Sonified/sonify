@@ -61,6 +61,51 @@
     msg.addEventListener('input', grow);
   }
 
+  // ----- after the email: reveal the rest of the form -----
+  // People who fill in name + email shouldn't think that's the whole form.
+  const roleGroup = form.querySelector('input[name="role"]')?.closest('.cf-group');
+  let revealed = false;
+  const emailError = document.getElementById('cf-email-error');
+  function showEmailError(on) {
+    if (!emailError) return;
+    emailError.classList.toggle('is-shown', on);
+    el.email.setAttribute('aria-invalid', on ? 'true' : 'false');
+    const field = el.email.closest('.cf-field');
+    if (on) field.classList.add('cf-invalid'); else field.classList.remove('cf-invalid');
+  }
+  function checkEmail() {
+    const v = el.email.value.trim();
+    showEmailError(v !== '' && !EMAIL_RE.test(v));
+  }
+  el.email.addEventListener('blur', checkEmail);
+  el.email.addEventListener('input', () => {
+    // Only clear while typing; never nag mid-word.
+    if (emailError.classList.contains('is-shown') && EMAIL_RE.test(el.email.value.trim())) showEmailError(false);
+  });
+
+  function revealRest() {
+    if (revealed || !roleGroup) return;
+    const email = el.email.value.trim();
+    if (!EMAIL_RE.test(email)) return;
+    const r = roleGroup.getBoundingClientRect();
+    const vh = window.innerHeight;
+    // Only move if the next question isn't really on screen: its heading plus the first row
+    // of options (~90px) must be visible for us to leave the page alone.
+    if (r.top + 90 <= vh) { revealed = true; return; }
+    revealed = true;
+    // Bring the options up to about a third of the way down the screen.
+    window.scrollBy({ top: r.top - vh * 0.35, behavior: 'smooth' });
+  }
+  el.email.addEventListener('change', revealRest);
+  el.email.addEventListener('blur', revealRest);
+  // Enter in Name moves to Email; Enter in Email reveals the options instead of submitting.
+  el.name.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); el.email.focus(); }
+  });
+  el.email.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); checkEmail(); if (EMAIL_RE.test(el.email.value.trim())) { el.email.blur(); revealRest(); } }
+  });
+
   // ----- conditional fields -----
   function syncConditionals() {
     const intOther = form.querySelector('input[name="interests"][value="__other_option__"]').checked;
@@ -90,8 +135,9 @@
   function clearError(node) {
     (node.closest('.cf-field') || node.closest('.cf-group') || node).classList.remove('cf-invalid');
   }
-  form.addEventListener('input', e => clearError(e.target));
-  form.addEventListener('change', e => clearError(e.target));
+  // The email field manages its own error state (message + border) in checkEmail().
+  form.addEventListener('input', e => { if (e.target !== el.email) clearError(e.target); });
+  form.addEventListener('change', e => { if (e.target !== el.email) clearError(e.target); });
 
   function validate() {
     let firstBad = null;
@@ -100,7 +146,7 @@
       if (i.closest('[hidden]')) return;
       const v = i.value.trim();
       if (i.required && !v) bad(i);
-      else if (i.type === 'email' && v && !EMAIL_RE.test(v)) bad(i);
+      else if (i.type === 'email' && v && !EMAIL_RE.test(v)) { bad(i); if (i === el.email) showEmailError(true); }
     });
     ['role'].forEach(name => {
       if (!form.querySelector(`input[name="${name}"]:checked`)) bad(form.querySelector(`input[name="${name}"]`));

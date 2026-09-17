@@ -29,7 +29,7 @@
     })();
   </script>
   <link rel="stylesheet" href="styles.css?v=1">
-  <link rel="stylesheet" href="sonify.css?v=66">
+  <link rel="stylesheet" href="sonify.css?v=77">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -176,6 +176,8 @@
         <button class="seq-play" id="seq-play"><span style="vertical-align: 2px;">&#9654;</span> Play</button>
         <button class="seq-loop" id="seq-loop"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px;"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg> Loop</button>
         <button class="seq-randomize" id="seq-randomize">Randomize</button>
+        <button class="seq-randomize seq-share" id="seq-share" type="button">Share</button>
+        <span class="seq-share-toast" id="seq-share-toast" role="status" aria-live="polite"></span>
       </div>
       <div class="instruments-grid">
         <div class="instrument-card">
@@ -206,10 +208,9 @@
         <a class="instrument-card meditate-card" href="https://meditatewiththesun.com/" target="_blank" rel="noopener">
           <div class="instrument-visual catalog-visual meditate-visual" aria-hidden="true">
             <div class="sun-breath">
-              <picture class="sun-img">
-                <source srcset="images/meditate-sun.webp?v=2" type="image/webp">
-                <img src="images/meditate-sun.jpg?v=2" alt="" width="1200" height="871" loading="lazy" decoding="async">
-              </picture>
+              <video class="sun-img sun-video" src="video/sun-0171-rotation-384.mp4?v=2" data-start="76"
+                     muted loop playsinline preload="metadata" disablepictureinpicture aria-hidden="true"></video>
+              <canvas class="sun-trails" aria-hidden="true"></canvas>
             </div>
           </div>
           <h3><span class="contact-accent-word" style="color: var(--accent);">Meditate</span> with the Sun</h3>
@@ -283,7 +284,8 @@
             </label>
             <label class="cf-field">
               <span class="cf-label">Email <b>*</b></span>
-              <input type="email" name="email" autocomplete="email" inputmode="email" required>
+              <input type="email" name="email" autocomplete="email" inputmode="email" required aria-describedby="cf-email-error">
+              <span class="cf-error" id="cf-email-error" aria-live="polite">Are you sure that&rsquo;s correct?</span>
             </label>
           </div>
 
@@ -373,9 +375,10 @@
   <script src="js/pages.js?v=10"></script>
   <script src="js/rays.js?v=9"></script>
   <script type="module" src="js/audio.js?v=10"></script>
-  <script type="module" src="js/visuals.js?v=36"></script>
-  <script type="module" src="js/main.js?v=42"></script>
-  <script src="js/contact-form.js?v=6"></script>
-  <script type="module" src="js/sonify.js?v=13"></script>
+  <script type="module" src="js/visuals.js?v=38"></script>
+  <script type="module" src="js/main.js?v=44"></script>
+  <script src="js/contact-form.js?v=10"></script>
+  <script src="js/share.js?v=1"></script>
+  <script type="module" src="js/sonify.js?v=23"></script>
 </body>
 </html>

@@ -1155,3 +1155,75 @@ html:not(.is-mobile) #stem-music .music-content { margin-top: -10vh; }
 /* Wide starfield frame: show the whole frame, sun a bit smaller, black matches the image edges */
 .meditate-card .sun-img img { object-fit: contain; transform: scale(1); }
 .meditate-card:hover .sun-img img { transform: scale(1.04); }
+/* Field-level error message (e.g. malformed email) */
+.cf-error { font-size: 0.85rem; color: var(--coral); line-height: 1.4; }
+/* Desktop: the email message sits to the right of the email box, vertically centered on it */
+html:not(.is-mobile) .cf-field:has(#cf-email-error) { position: relative; }
+html:not(.is-mobile) #cf-email-error {
+  position: absolute;
+  left: calc(100% + 1rem);
+  bottom: 0;
+  height: calc(16px * 1.2 + 1.6rem + 2px);   /* matches the input height (16px text, 0.8rem padding, 1px borders) */
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+/* Natural scrolling inside the tall Work with page (class set by js/sonify.js) */
+html.free-scroll { scroll-snap-type: none !important; }
+/* Desktop: the message points back at the email box */
+html:not(.is-mobile) #cf-email-error::before { content: '\2190'; margin-right: 0.45rem; }
+
+/* Email message fades in and out quickly instead of popping */
+#cf-email-error {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0s linear 0.2s;
+}
+#cf-email-error.is-shown {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.2s ease, visibility 0s;
+}
+/* Phones: the message sits under the box, so it also opens and closes its space */
+.is-mobile #cf-email-error { display: block; max-height: 0; overflow: hidden; transition: opacity 0.2s ease, max-height 0.2s ease, visibility 0s linear 0.2s; }
+.is-mobile #cf-email-error.is-shown { max-height: 3em; transition: opacity 0.2s ease, max-height 0.2s ease, visibility 0s; }
+/* Meditate card: looping sun video fills the card image area */
+.meditate-card .sun-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  display: block;
+  pointer-events: none;
+  transform: scale(1);
+  transition: transform 1.2s ease;
+}
+.meditate-card:hover .sun-video { transform: scale(1.04); }
+@media (prefers-reduced-motion: reduce) { .meditate-card .sun-video { transition: none; } }
+/* Sun video scale is driven by js/sonify.js (rest 1.26, hover 1.4) */
+.meditate-card .sun-video, .meditate-card:hover .sun-video { transition: none; }
+/* Feedback glow canvas covers the image area; the video keeps playing beneath it */
+.meditate-card .sun-trails { position: absolute; inset: 0; width: 100%; height: 100%; display: none; pointer-events: none; }
+.meditate-card .trails-on .sun-trails { display: block; }
+.meditate-card .trails-on .sun-video { opacity: 0.001; }
+
+/* Desktop golden hour: more room for the video */
+html:not(.is-mobile) #citizen-science .pg-split { max-width: 1560px; grid-template-columns: 0.8fr 1.2fr; gap: 3rem; }
+html:not(.is-mobile) #citizen-science .pg-split .pg-right .yt { max-width: calc((100vh - 170px) * 1.7778); }
+
+/* Share button + confirmation */
+.seq-toolbar { position: relative; }
+.seq-share-toast {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  align-self: center;
+  margin-left: 0.4rem;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  white-space: nowrap;
+}
+.seq-share-toast.is-shown { opacity: 1; }
