@@ -860,3 +860,93 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 .is-mobile .meditate-card { margin-top: 13.2rem; margin-bottom: 4.5rem; }
 /* Phones: 15% more room above Breathe (13.2rem -> 15.18rem) */
 .is-mobile .meditate-card { margin-top: 15.18rem; }
+
+/* ============================================================
+   Inline contact form (Work with Robert)
+   ============================================================ */
+/* Desktop: the last page grows to hold the form */
+#contact { height: auto; min-height: 100vh; overflow: visible; padding-top: 6rem; padding-bottom: 4rem; }
+.wwr-bottom { max-width: 780px; gap: 1.5rem; }
+
+.cf-intro { font-size: 1rem; line-height: 1.7; color: var(--text-dim); }
+.cf-intro .wwr-email { color: var(--accent); }
+.cf { display: flex; flex-direction: column; gap: 1.6rem; width: 100%; }
+.cf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.cf-field { display: flex; flex-direction: column; gap: 0.5rem; }
+.cf-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.cf-label b { color: var(--accent); font-weight: 400; }
+.cf input[type="text"], .cf input[type="email"], .cf textarea {
+  width: 100%;
+  background: rgba(10, 10, 14, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  padding: 0.8rem 0.95rem;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.cf textarea { resize: vertical; min-height: 110px; line-height: 1.5; }
+.cf input:focus, .cf textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.15);
+}
+.cf-group { border: 0; margin: 0; padding: 0; min-width: 0; }
+.cf-group legend { padding: 0; margin-bottom: 0.7rem; }
+.cf-chips { display: flex; flex-wrap: wrap; gap: 0.55rem; }
+.cf-chip { position: relative; }
+.cf-chip input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.cf-chip span {
+  display: inline-block;
+  padding: 0.55rem 1.05rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 100px;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  background: rgba(10, 10, 14, 0.55);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+.cf-chip:hover span { border-color: rgba(212, 168, 67, 0.45); color: var(--text); }
+.cf-chip input:checked + span { border-color: var(--accent); color: var(--accent); background: rgba(212, 168, 67, 0.14); }
+.cf-chip input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cf-other, .cf-interest-other { margin-top: 0.85rem; max-width: 440px; }
+
+.cf-invalid input, .cf-invalid textarea { border-color: var(--coral) !important; }
+.cf-group.cf-invalid .cf-chip span { border-color: rgba(224, 120, 80, 0.65); }
+.cf-invalid .cf-label, .cf-invalid legend { color: var(--coral); }
+
+.cf-actions { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+.cf-submit { pointer-events: auto; cursor: pointer; font-size: 0.9rem; padding: 0.95rem 3.2rem; }
+.cf-submit:disabled { opacity: 0.6; cursor: default; }
+.cf-status { font-size: 0.88rem; color: var(--text-dim); }
+.cf-status.is-error { color: var(--coral); }
+.cf-status a { color: var(--accent); text-decoration: underline; }
+
+.cf-success {
+  border: 1px solid rgba(212, 168, 67, 0.35);
+  border-radius: 12px;
+  padding: 1.5rem 1.75rem;
+  background: rgba(18, 18, 26, 0.72);
+}
+.cf-success-title { font-size: 1.35rem; font-weight: 300; margin-bottom: 0.45rem; }
+.cf-success-body { color: var(--text-dim); line-height: 1.6; }
+.cf-success .wwr-email { color: var(--accent); }
+
+/* Phones: one column, full-width chips for the long role options, 16px inputs (no iOS zoom) */
+.is-mobile .cf-row { grid-template-columns: 1fr; }
+.is-mobile .cf input[type="text"], .is-mobile .cf input[type="email"], .is-mobile .cf textarea { font-size: 16px; }
+.is-mobile .cf-chips-stack { flex-direction: column; }
+.is-mobile .cf-chips-stack .cf-chip span { display: block; width: 100%; }
+.is-mobile .cf-submit { width: 100%; }
+.is-mobile .cf-actions { flex-direction: column; align-items: stretch; }
+.is-mobile .cf-intro { font-size: 0.95rem; }
+.is-mobile .wwr-bottom { text-align: left; }

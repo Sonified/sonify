@@ -32,6 +32,30 @@ window.SONIFY = {
     starEmitter: false,  // the slow wandering emitter that adds stars to the starfield
   },
 
+  // Inline contact form on the Work with Robert page (js/contact-form.js).
+  // Posts to the "Sound Science: Work with Robert" Google Form. Entry IDs are the
+  // form's questionIds converted from hex (Forms API: GET forms/<id>).
+  // Choice values on the page must match the form's option text exactly.
+  FORM: {
+    action: 'https://docs.google.com/forms/d/e/1FAIpQLSf0D42jndoFzznXSsRWfbnjAB_u8ek0O-mHcxKnZ_7bdJG1SQ/formResponse',
+    entries: {
+      name:          'entry.1406118423',
+      email:         'entry.1404109041',
+      under18:       'entry.866273264',
+      guardianName:  'entry.842371992',
+      guardianEmail: 'entry.1104510642',
+      role:          'entry.1804815478',
+      interests:     'entry.1609566717',
+      message:       'entry.135140102',
+    },
+    // Section path Google expects: 0 = first page, 1 = guardian, 2 = about you.
+    pageHistoryMinor: '0,1,2',
+    pageHistoryAdult: '0,2',
+    // Optional fallback: a Formspree endpoint (https://formspree.io/f/xxxx). When set, it is used instead.
+    formspree: '',
+    email: 'robert@auralab.io',
+  },
+
   LINKS: {
     // Public share link to the Solar Sample Pack zip (Dropbox / Drive / GitHub release)
     samplePack: 'https://data.now.audio/samples/Solar_Sample_Pack_I.zip',

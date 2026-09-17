@@ -834,6 +834,8 @@ import { initVisuals, onVisualsPause, onVisualsResume, onVisualsThrottle } from 
     const isButtonTarget = targetTag === 'BUTTON';
     const isFormTarget = isEditableTarget || isButtonTarget;
     const isSpaceKey = e.key === ' ' || e.key === 'Spacebar';
+    // Keys inside the contact form (Tab, arrows, space) behave normally.
+    if (e.target?.closest?.('#contact-form')) return;
     if (e.key === 'Tab') {
       e.preventDefault();
       return;

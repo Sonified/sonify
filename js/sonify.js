@@ -199,6 +199,7 @@
     resize();
     ensureParticles();
     window.addEventListener('resize', () => { resize(); });
+    if (window.ResizeObserver) new ResizeObserver(() => resize()).observe(section); // page grows when the form reveals fields
 
     // Track "section on screen" and "tab visible" separately; recompute from both
     // so a hidden tab can wake the loop back up on return.

@@ -29,7 +29,7 @@
     })();
   </script>
   <link rel="stylesheet" href="styles.css?v=1">
-  <link rel="stylesheet" href="sonify.css?v=36">
+  <link rel="stylesheet" href="sonify.css?v=37">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -273,14 +273,88 @@
         </div>
       </div>
       <div class="wwr-bottom">
-        <!-- TODO (Robert): fill in the blanks in this sentence -->
         <p class="wwr-body">Robert works with individuals and organizations ready to explore sound in new ways. From one-on-one mentorship to full-scale productions.</p>
-        <div class="wwr-cta">
-          <a class="contact-btn wwr-btn" data-link="googleForm" href="mailto:robert@auralab.io" target="_blank" rel="noopener">Start a conversation</a>
-          <a class="wwr-email" href="mailto:robert@auralab.io">robert@auralab.io</a>
+
+        <!-- Inline contact form. Submits to the "Sound Science: Work with Robert" Google Form
+             (entry IDs in js/pages.js -> SONIFY.FORM). Wired by js/contact-form.js. -->
+        <p class="cf-intro">If you're a student, educator, organization, or researcher curious about sound and data, fill out the form and I'll get back to you within 48 hours. Or email directly: <a class="wwr-email" href="mailto:robert@auralab.io">robert@auralab.io</a></p>
+
+        <form id="contact-form" class="cf" novalidate>
+          <div class="cf-row">
+            <label class="cf-field">
+              <span class="cf-label">Name <b>*</b></span>
+              <input type="text" name="name" autocomplete="name" required>
+            </label>
+            <label class="cf-field">
+              <span class="cf-label">Email <b>*</b></span>
+              <input type="email" name="email" autocomplete="email" inputmode="email" required>
+            </label>
+          </div>
+
+          <fieldset class="cf-group" data-required>
+            <legend class="cf-label">Are you under 18? <b>*</b></legend>
+            <div class="cf-chips">
+              <label class="cf-chip"><input type="radio" name="under18" value="Yes" required><span>Yes</span></label>
+              <label class="cf-chip"><input type="radio" name="under18" value="No"><span>No</span></label>
+            </div>
+          </fieldset>
+
+          <div class="cf-row cf-guardian" hidden>
+            <label class="cf-field">
+              <span class="cf-label">Parent/Guardian name <b>*</b></span>
+              <input type="text" name="guardianName" autocomplete="off">
+            </label>
+            <label class="cf-field">
+              <span class="cf-label">Parent/Guardian email <b>*</b></span>
+              <input type="email" name="guardianEmail" autocomplete="off" inputmode="email">
+            </label>
+          </div>
+
+          <fieldset class="cf-group" data-required>
+            <legend class="cf-label">Which best describes you? <b>*</b></legend>
+            <div class="cf-chips cf-chips-stack">
+              <label class="cf-chip"><input type="radio" name="role" value="Student seeking 1-on-1 mentorship" data-type="student" required><span>Student seeking 1-on-1 mentorship</span></label>
+              <label class="cf-chip"><input type="radio" name="role" value="Educator/school seeking a workshop" data-type="educator"><span>Educator/school seeking a workshop</span></label>
+              <label class="cf-chip"><input type="radio" name="role" value="Corporate client seeking a commission" data-type="corporate"><span>Corporate client seeking a commission</span></label>
+              <label class="cf-chip"><input type="radio" name="role" value="Researcher interested in sonification" data-type="researcher"><span>Researcher interested in sonification</span></label>
+              <label class="cf-chip"><input type="radio" name="role" value="__other_option__" data-type="other"><span>Other</span></label>
+            </div>
+            <label class="cf-field cf-other" hidden>
+              <span class="cf-label">Tell me more <b>*</b></span>
+              <input type="text" name="roleOther" autocomplete="off">
+            </label>
+          </fieldset>
+
+          <fieldset class="cf-group">
+            <legend class="cf-label">What kind of data are you curious to explore?</legend>
+            <div class="cf-chips">
+              <label class="cf-chip"><input type="checkbox" name="interests" value="Solar"><span>Solar</span></label>
+              <label class="cf-chip"><input type="checkbox" name="interests" value="Terrestrial"><span>Terrestrial</span></label>
+              <label class="cf-chip"><input type="checkbox" name="interests" value="Cosmic"><span>Cosmic</span></label>
+              <label class="cf-chip"><input type="checkbox" name="interests" value="The Body"><span>The Body</span></label>
+              <label class="cf-chip"><input type="checkbox" name="interests" value="__other_option__"><span>Other</span></label>
+            </div>
+            <label class="cf-field cf-interest-other" hidden>
+              <span class="cf-label">What else?</span>
+              <input type="text" name="interestsOther" autocomplete="off">
+            </label>
+          </fieldset>
+
+          <label class="cf-field">
+            <span class="cf-label">Anything you'd like to share or ask?</span>
+            <textarea name="message" rows="4"></textarea>
+          </label>
+
+          <div class="cf-actions">
+            <button type="submit" class="contact-btn cf-submit">Send</button>
+            <p class="cf-status" role="status" aria-live="polite"></p>
+          </div>
+        </form>
+
+        <div class="cf-success" hidden>
+          <p class="cf-success-title">Thank you. Your message is on its way.</p>
+          <p class="cf-success-body">I'll get back to you within 48 hours. You can always reach me at <a class="wwr-email" href="mailto:robert@auralab.io">robert@auralab.io</a>.</p>
         </div>
-        <!-- Optional inline Google Form. Filled automatically by js/pages.js when LINKS.googleFormEmbed is set. -->
-        <div id="form-embed" class="form-embed" hidden></div>
       </div>
       <div class="wwr-footer">
         <span>Sound Science</span> &middot; <span>Robert Alexander</span> &middot; <span>&copy; 2026</span>
@@ -305,11 +379,12 @@
 
   <!-- Page order + links. Classic script: runs before the modules below, so
        the DOM is in its final order before visuals/audio initialize. -->
-  <script src="js/pages.js?v=5"></script>
+  <script src="js/pages.js?v=6"></script>
   <script src="js/rays.js?v=9"></script>
   <script type="module" src="js/audio.js?v=10"></script>
   <script type="module" src="js/visuals.js?v=36"></script>
-  <script type="module" src="js/main.js?v=41"></script>
-  <script type="module" src="js/sonify.js?v=4"></script>
+  <script type="module" src="js/main.js?v=42"></script>
+  <script src="js/contact-form.js?v=1"></script>
+  <script type="module" src="js/sonify.js?v=5"></script>
 </body>
 </html>
