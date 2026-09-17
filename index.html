@@ -29,7 +29,7 @@
     })();
   </script>
   <link rel="stylesheet" href="styles.css?v=1">
-  <link rel="stylesheet" href="sonify.css?v=39">
+  <link rel="stylesheet" href="sonify.css?v=57">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -273,11 +273,11 @@
         </div>
       </div>
       <div class="wwr-bottom">
-        <p class="wwr-body">Robert works with individuals and organizations ready to explore sound in new ways. From one-on-one mentorship to full-scale productions.</p>
+        <p class="wwr-body"><span class="wwr-question">If you could press play on anything in the universe, what would you listen to?</span> For fifteen years, I've sonified everything from the solar wind to the human breath. I work with individuals and organizations, from 1:1 coaching to full-scale productions. What shall we listen to first?</p>
 
         <!-- Inline contact form. Submits to the "Sound Science: Work with Robert" Google Form
              (entry IDs in js/pages.js -> SONIFY.FORM). Wired by js/contact-form.js. -->
-        <p class="cf-intro">If you're a student, educator, organization, or researcher curious about sound and data, fill out the form and I'll get back to you within 48 hours. Or email directly: <a class="wwr-email" href="mailto:robert@auralab.io">robert@auralab.io</a></p>
+        <p class="cf-intro">Share your information and I'll get back to you within 48 hours. Or email me directly at <a class="wwr-email" href="mailto:robert@auralab.io">robert@auralab.io</a>.</p>
 
         <form id="contact-form" class="cf" novalidate>
           <div class="cf-row">
@@ -292,47 +292,52 @@
           </div>
 
           <fieldset class="cf-group" data-required>
-            <legend class="cf-label">I am a... <b>*</b></legend>
+            <legend class="cf-label">What best describes you? <b>*</b></legend>
             <div class="cf-chips">
               <label class="cf-chip"><input type="radio" name="role" value="Student" data-type="student" required><span>Student</span></label>
               <label class="cf-chip"><input type="radio" name="role" value="Educator" data-type="educator"><span>Educator</span></label>
               <label class="cf-chip"><input type="radio" name="role" value="Musician / producer" data-type="producer"><span>Musician / producer</span></label>
               <label class="cf-chip"><input type="radio" name="role" value="Researcher / scientist" data-type="researcher"><span>Researcher / scientist</span></label>
-              <label class="cf-chip"><input type="radio" name="role" value="Company or agency" data-type="company"><span>Company or agency</span></label>
-              <label class="cf-chip"><input type="radio" name="role" value="Just curious" data-type="curious"><span>Just curious</span></label>
+              <div class="cf-inline">
+                <label class="cf-chip"><input type="radio" name="role" value="Company / agency" data-type="company"><span>Company / agency</span></label>
+                <label class="cf-chip"><input type="radio" name="role" value="Just curious" data-type="curious"><span>Just curious</span></label>
+              </div>
             </div>
           </fieldset>
 
           <fieldset class="cf-group">
             <legend class="cf-label">I'm interested in... <span class="cf-hint">select all that apply</span></legend>
             <div class="cf-chips">
-              <label class="cf-chip"><input type="checkbox" name="services" value="1-on-1 mentorship" data-type="mentorship"><span>1-on-1 mentorship</span></label>
-              <label class="cf-chip"><input type="checkbox" name="services" value="Workshop or school visit" data-type="workshop"><span>Workshop or school visit</span></label>
-              <label class="cf-chip"><input type="checkbox" name="services" value="Talk or presentation" data-type="talk"><span>Talk or presentation</span></label>
-              <label class="cf-chip"><input type="checkbox" name="services" value="Custom sound or commission" data-type="commission"><span>Custom sound or commission</span></label>
-              <label class="cf-chip"><input type="checkbox" name="services" value="Research collaboration" data-type="research"><span>Research collaboration</span></label>
+              <label class="cf-chip"><input type="checkbox" name="services" value="1:1 Coaching" data-type="mentorship"><span>1:1 Coaching</span></label>
+              <label class="cf-chip"><input type="checkbox" name="services" value="Workshop" data-type="workshop"><span>Workshop</span></label>
+              <label class="cf-chip"><input type="checkbox" name="services" value="Talk" data-type="talk"><span>Talk</span></label>
+              <label class="cf-chip"><input type="checkbox" name="services" value="Commission" data-type="commission"><span>Commission</span></label>
+              <label class="cf-chip"><input type="checkbox" name="services" value="Collaboration" data-type="collaboration"><span>Collaboration</span></label>
+              <label class="cf-chip"><input type="checkbox" name="services" value="Research" data-type="research"><span>Research</span></label>
               <label class="cf-chip"><input type="checkbox" name="services" value="Not sure yet" data-type="unsure"><span>Not sure yet</span></label>
             </div>
           </fieldset>
 
           <fieldset class="cf-group">
-            <legend class="cf-label">What kind of data are you curious to explore?</legend>
+            <legend class="cf-label">What kind of data would you like to sonify?</legend>
             <div class="cf-chips">
-              <label class="cf-chip"><input type="checkbox" name="interests" value="Solar"><span>Solar</span></label>
-              <label class="cf-chip"><input type="checkbox" name="interests" value="Terrestrial"><span>Terrestrial</span></label>
               <label class="cf-chip"><input type="checkbox" name="interests" value="Cosmic"><span>Cosmic</span></label>
-              <label class="cf-chip"><input type="checkbox" name="interests" value="The Body"><span>The Body</span></label>
+              <label class="cf-chip"><input type="checkbox" name="interests" value="Solar"><span>Solar</span></label>
+              <label class="cf-chip"><input type="checkbox" name="interests" value="Planetary"><span>Planetary</span></label>
+              <label class="cf-chip"><input type="checkbox" name="interests" value="Environmental"><span>Environmental</span></label>
+              <label class="cf-chip"><input type="checkbox" name="interests" value="Physiological"><span>Physiological</span></label>
+              <label class="cf-chip"><input type="checkbox" name="interests" value="Neurological"><span>Neurological</span></label>
               <label class="cf-chip"><input type="checkbox" name="interests" value="__other_option__"><span>Other</span></label>
             </div>
             <label class="cf-field cf-interest-other" hidden>
-              <span class="cf-label">What else?</span>
+              <span class="cf-label">Tell me about it:</span>
               <input type="text" name="interestsOther" autocomplete="off">
             </label>
           </fieldset>
 
           <label class="cf-field">
             <span class="cf-label">Anything you'd like to share or ask?</span>
-            <textarea name="message" rows="4"></textarea>
+            <textarea name="message" rows="6"></textarea>
           </label>
 
           <div class="cf-actions">
@@ -369,12 +374,12 @@
 
   <!-- Page order + links. Classic script: runs before the modules below, so
        the DOM is in its final order before visuals/audio initialize. -->
-  <script src="js/pages.js?v=8"></script>
+  <script src="js/pages.js?v=9"></script>
   <script src="js/rays.js?v=9"></script>
   <script type="module" src="js/audio.js?v=10"></script>
   <script type="module" src="js/visuals.js?v=36"></script>
   <script type="module" src="js/main.js?v=42"></script>
-  <script src="js/contact-form.js?v=3"></script>
-  <script type="module" src="js/sonify.js?v=5"></script>
+  <script src="js/contact-form.js?v=6"></script>
+  <script type="module" src="js/sonify.js?v=10"></script>
 </body>
 </html>

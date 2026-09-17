@@ -955,3 +955,98 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 :root { --text-dim: #bdbab4; }
 .pg-caption { opacity: 0.9; }
 .cf-hint { text-transform: none; letter-spacing: 0.02em; font-size: 0.72rem; margin-left: 0.4rem; opacity: 0.8; }
+
+/* ----- Contact form, list layout (.cf--list): vertical checkboxes and radio buttons.
+   Overrides the chip styles above; remove the class (style: 'chips') to get pills back. ----- */
+.cf--list .cf-chips { flex-direction: column; flex-wrap: nowrap; gap: 0.15rem; }
+.cf--list .cf-chip span {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.42rem 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.35;
+}
+.cf--list .cf-chip span::before {
+  content: '';
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 4px;
+  background: rgba(10, 10, 14, 0.55) center / 12px 12px no-repeat;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.cf--list .cf-chip input[type="radio"] + span::before { border-radius: 50%; }
+.cf--list .cf-chip:hover span { color: var(--text); }
+.cf--list .cf-chip:hover span::before { border-color: rgba(212, 168, 67, 0.7); }
+.cf--list .cf-chip input:checked + span { color: var(--text); background: none; border: 0; }
+.cf--list .cf-chip input[type="checkbox"]:checked + span::before {
+  border-color: var(--accent);
+  background-color: var(--accent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.3 2.3 4.7-5' fill='none' stroke='%23060608' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.cf--list .cf-chip input[type="radio"]:checked + span::before {
+  border-color: var(--accent);
+  background-color: var(--accent);
+  box-shadow: inset 0 0 0 4px #0b0b10;
+}
+.cf--list .cf-chip input:focus-visible + span { outline: none; }
+.cf--list .cf-chip input:focus-visible + span::before { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cf--list .cf-group.cf-invalid .cf-chip span { border: 0; }
+.cf--list .cf-group.cf-invalid .cf-chip span::before { border-color: var(--coral); }
+.cf--list .cf-group legend { margin-bottom: 0.45rem; }
+/* "Company or agency" + "Just curious" wrap together as one unit in the pill layout;
+   in the list layout the wrapper is invisible and they stack like every other option */
+.cf--list .cf-inline { display: contents; }
+.cf--chips .cf-inline { display: flex; flex-wrap: nowrap; gap: 0.55rem; }
+.cf--chips .cf-inline .cf-chip span { white-space: nowrap; }
+/* Form uses the full content width (the 780px cap made it cramped) */
+.wwr-bottom { max-width: none; }
+/* Reasonable field widths now that the form spans the page */
+.cf-row { grid-template-columns: repeat(2, minmax(0, 300px)); }
+.cf > .cf-field { max-width: 624px; }
+.is-mobile .cf-row { grid-template-columns: 1fr; }
+.is-mobile .cf > .cf-field { max-width: none; }
+/* Type scale: labels no longer read as fine print; inputs 16px everywhere (no iOS zoom); chips a notch up */
+.cf-label { font-size: 0.84rem; letter-spacing: 0.12em; }
+.cf-hint { font-size: 0.8rem; }
+.cf input[type="text"], .cf input[type="email"], .cf textarea { font-size: 16px; }
+.cf-chip span { font-size: 1rem; }
+/* A little more air between questions (was 1.6rem) */
+.cf { gap: 2.1rem; }
+/* Question labels in gold (hint stays neutral so it reads as secondary) */
+.cf-label { color: var(--accent); }
+.cf-label .cf-hint { color: var(--text-dim); }
+/* Message box a bit taller (was 110px min) */
+.cf textarea { min-height: 160px; }
+.cf textarea { resize: vertical; overflow-y: auto; }
+/* Chips share the logo cards' geometry (10px radius) instead of full pills */
+.cf--chips .cf-chip span { border-radius: 10px; }
+/* Opening question above the form: set apart, gold italic */
+.wwr-question {
+  font-size: clamp(1.35rem, 2.1vw, 1.8rem);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.4;
+  color: var(--accent);
+  max-width: 900px;
+  margin-bottom: 0.25rem;
+}
+.wwr-body { max-width: 900px; }
+.is-mobile .wwr-question { font-size: 1.3rem; }
+/* Question fits on one line on desktop */
+.wwr-question { font-size: clamp(1rem, 1.5vw, 1.35rem); max-width: none; white-space: nowrap; }
+.is-mobile .wwr-question { white-space: normal; font-size: 1.2rem; }
+/* Question rolled into the paragraph: one block, a bit wider */
+.wwr-body { max-width: 1100px; }
+.wwr-body .wwr-question { font-size: inherit; line-height: inherit; white-space: normal; margin: 0; max-width: none; font-weight: 400; }
+.is-mobile .wwr-body .wwr-question { font-size: inherit; }
+/* Italic "?" leans into the following space; give it a little extra room */
+.wwr-body .wwr-question { margin-right: 0.3em; }
+/* Work with page only: momentum scrolling up inside it stops at its top edge. */
+#contact { scroll-snap-stop: always; }

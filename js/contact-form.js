@@ -18,6 +18,49 @@
   const submitBtn = form.querySelector('.cf-submit');
   const interestOther = form.querySelector('.cf-interest-other');
 
+  // ----- choice layout: 'list' or 'chips' (SONIFY.FORM.style) -----
+  const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  const STYLE_KEY = 'sonify_formStyle';
+  function applyStyle(name) {
+    const style = name === 'chips' ? 'chips' : 'list';
+    form.classList.toggle('cf--list', style === 'list');
+    form.classList.toggle('cf--chips', style === 'chips');
+    return style;
+  }
+  let localStyle = null;
+  if (isLocal) { try { localStyle = localStorage.getItem(STYLE_KEY); } catch (e) {} }
+  let currentStyle = applyStyle(localStyle || cfg.style || 'list');
+  if (isLocal) {
+    // Localhost only: click the portrait to flip the layout (remembered in this browser).
+    const photo = document.querySelector('.wwr-photo');
+    if (photo) {
+      photo.style.cursor = 'pointer';
+      photo.title = 'Toggle form layout (localhost only)';
+      photo.addEventListener('click', () => {
+        const root = document.documentElement;
+        const before = photo.getBoundingClientRect().top;
+        root.style.scrollSnapType = 'none';
+        currentStyle = applyStyle(currentStyle === 'list' ? 'chips' : 'list');
+        window.scrollBy(0, photo.getBoundingClientRect().top - before);
+        requestAnimationFrame(() => requestAnimationFrame(() => { root.style.scrollSnapType = ''; }));
+        try { localStorage.setItem(STYLE_KEY, currentStyle); } catch (e) {}
+        console.log('[contact-form] layout:', currentStyle);
+      });
+    }
+  }
+
+  // ----- message box grows with its text (manual drag-resize still works on desktop) -----
+  const msg = el.message;
+  if (msg) {
+    const grow = () => {
+      if (msg.scrollHeight > msg.clientHeight) {
+        msg.style.height = 'auto';
+        msg.style.height = (msg.scrollHeight + 2) + 'px';
+      }
+    };
+    msg.addEventListener('input', grow);
+  }
+
   // ----- conditional fields -----
   function syncConditionals() {
     const intOther = form.querySelector('input[name="interests"][value="__other_option__"]').checked;

@@ -37,6 +37,9 @@ window.SONIFY = {
   // form's questionIds converted from hex (Forms API: GET forms/<id>).
   // Choice values on the page must match the form's option text exactly.
   FORM: {
+    // Choice layout: 'list' (vertical checkboxes / radio buttons, like straka.la)
+    // or 'chips' (pill buttons). On localhost, clicking the portrait flips between them.
+    style: 'list',
     action: 'https://docs.google.com/forms/d/e/1FAIpQLSf0D42jndoFzznXSsRWfbnjAB_u8ek0O-mHcxKnZ_7bdJG1SQ/formResponse',
     entries: {
       name:          'entry.1406118423',
