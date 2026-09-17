@@ -165,7 +165,7 @@
   max-width: 1320px;
 }
 .pg-split .pg-left { display: flex; flex-direction: column; }
-.pg-split .pg-left .section-label { margin-bottom: 0.9rem; }
+.pg-split .pg-left .section-label { margin-bottom: calc(0.9rem - 5px); }
 .pg-split .pg-body { max-width: 560px; }
 .pg-split .pg-right { display: flex; flex-direction: column; gap: 0.9rem; }
 .pg-split .pg-right .yt { max-width: calc((100vh - 260px) * 1.7778); }
@@ -310,7 +310,7 @@
 }
 
 .wwr-right { display: flex; flex-direction: column; }
-.wwr-right .section-label { margin-bottom: 0.9rem; }
+.wwr-right .section-label { margin-bottom: calc(0.9rem - 5px); }
 .wwr-title {
   font-size: clamp(2.4rem, 4.5vw, 3.8rem);
   font-weight: 300;
@@ -608,7 +608,7 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 .is-mobile .hero-tagline { font-size: 1rem; margin-bottom: 2rem; }
 
 /* Type scale */
-.is-mobile .section-label { font-size: 0.78rem; letter-spacing: 0.18em; margin-bottom: 0.9rem; }
+.is-mobile .section-label { font-size: 0.78rem; letter-spacing: 0.18em; margin-bottom: calc(0.9rem - 5px); }
 .is-mobile .pg-head { max-width: 100%; }
 .is-mobile .pg-title { font-size: 1.9rem; }
 .is-mobile .pg-title-lg { font-size: 2.3rem; }
@@ -869,9 +869,9 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 #contact { height: auto; min-height: 100vh; overflow: visible; padding-top: 6rem; padding-bottom: 4rem; }
 .wwr-bottom { max-width: 780px; gap: 1.5rem; }
 
-.cf-intro { font-size: 1rem; line-height: 1.7; color: var(--text-dim); }
+.cf-intro { font-size: 1rem; line-height: 1.7; color: var(--text-dim); margin-bottom: calc(0.9rem - 5px); }
 .cf-intro .wwr-email { color: var(--accent); }
-.cf { display: flex; flex-direction: column; gap: 1.6rem; width: 100%; }
+.cf { display: flex; flex-direction: column; gap: 2rem; width: 100%; }
 .cf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
 .cf-field { display: flex; flex-direction: column; gap: 0.5rem; }
 .cf-label {
@@ -881,7 +881,7 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
   text-transform: uppercase;
   color: var(--text-dim);
 }
-.cf-label b { color: var(--accent); font-weight: 400; }
+.cf-label b { color: var(--accent); font-weight: 400; display: inline-block; margin-left: -0.3em; transform: translateY(-0.18em); }
 .cf input[type="text"], .cf input[type="email"], .cf textarea {
   width: 100%;
   background: rgba(10, 10, 14, 0.55);
@@ -1014,7 +1014,7 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 .is-mobile .cf-row { grid-template-columns: 1fr; }
 .is-mobile .cf > .cf-field { max-width: none; }
 /* Type scale: labels no longer read as fine print; inputs 16px everywhere (no iOS zoom); chips a notch up */
-.cf-label { font-size: 0.84rem; letter-spacing: 0.12em; }
+.cf-label { font-size: 0.92rem; letter-spacing: 0.12em; }
 .cf-hint { font-size: 0.8rem; }
 .cf input[type="text"], .cf input[type="email"], .cf textarea { font-size: 16px; }
 .cf-chip span { font-size: 1rem; }
@@ -1281,3 +1281,18 @@ html:not(.is-mobile) #citizen-science .pg-split .pg-right .yt { max-width: calc(
    sits a bit higher (30% more room below it). */
 .is-mobile #education .pg-title { font-size: 1.65rem; }
 .is-mobile #education { padding-bottom: 7.29rem; }
+
+/* golden hour, desktop: the full title sits on one line, sized to fit the column
+   (phones keep their own size and break before "ft. The Sun"). */
+html:not(.is-mobile) #citizen-science .pg-title-lg { white-space: nowrap; font-size: clamp(1.9rem, 2.75vw, 2.9rem); }
+
+/* golden hour: video + caption render at 103%, scaled together as one unit */
+html:not(.is-mobile) #citizen-science .pg-split .pg-right { transform: scale(1.03); transform-origin: center; }
+
+/* golden hour: left column matches the video's edges — top to top, bottom to bottom
+   (padding-bottom offsets the caption line under the video) */
+html:not(.is-mobile) #citizen-science .pg-split { align-items: stretch; }
+html:not(.is-mobile) #citizen-science .pg-left { justify-content: space-between; margin-top: -1vh; padding-bottom: calc(2.1rem - 1.1vh); }
+
+/* Work with Robert: everything sits 5px closer to the top */
+html:not(.is-mobile) #contact .wwr-content { transform: translateY(-5px); }
