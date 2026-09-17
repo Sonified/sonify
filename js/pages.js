@@ -26,6 +26,18 @@ window.SONIFY = {
     'work-with-robert',  // Headshot, logos, contact
   ],
 
+  // Shareable page links: sonify.now.audio/#connect etc. (js/sonify.js keeps the
+  // address bar in sync while scrolling and jumps to the page on load).
+  SLUGS: {
+    'hero':             'soundscience',
+    'nasa-video':       'listen',
+    'audio-production': 'experience',
+    'pop':              'music',
+    'synth':            'play',
+    'work-with-robert': 'connect',
+    'qr':               'qr',
+  },
+
   // Phone-only switches (desktop ignores these)
   MOBILE: {
     blobs: false,        // nebula blobs behind "Step inside the data"

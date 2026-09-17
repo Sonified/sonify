@@ -43,6 +43,23 @@ http://localhost:3334/?pages=hero,synth,work-with-robert
 The `id` on each `<section>` is what Sonara's `visuals.js` / `main.js` key on
 for backgrounds and audio. Keep the id, rename the page with `data-page`.
 
+## Page links
+
+Each page has a shareable tag (set in `SLUGS` in js/pages.js). The address bar
+updates as you scroll, and loading a tagged link jumps straight to that page:
+
+| Page | Link |
+|---|---|
+| Hero | `sonify.now.audio/#soundscience` |
+| NASA video | `#listen` |
+| Sound as experience | `#experience` |
+| Music production | `#music` |
+| Play the Sun | `#play` |
+| Work with (form) | `#connect` |
+| QR (with `?qr=1`) | `#qr` |
+
+Combine with form pre-selects: `sonify.now.audio/?type=educator&interest=workshop#connect`
+
 ## Presentation mode: QR page
 
 Add `?qr=1` to the URL and one extra page appears after the last one: a big

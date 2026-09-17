@@ -29,7 +29,7 @@
     })();
   </script>
   <link rel="stylesheet" href="styles.css?v=1">
-  <link rel="stylesheet" href="sonify.css?v=57">
+  <link rel="stylesheet" href="sonify.css?v=66">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -93,12 +93,10 @@
   <section id="education" class="section page-video" data-page="nasa-video" data-nav="Listen to Space">
     <div class="pg-content">
       <div class="pg-head">
-        <div class="section-label">Listen to Space</div>
-        <h2 class="pg-title">NASA data, <em>transformed into sound</em></h2>
-        <p class="pg-body">Hear the Sun erupt and Earth's magnetosphere sing. Data from seven collaborative investigations, audified to reveal details the eyes can't see.</p>
+        <div class="section-label">Sponsored by NASA&rsquo;s HDRL</div>
+        <h2 class="pg-title">Hear the Sun erupt and Earth&rsquo;s magnetosphere <em>sing</em></h2>
       </div>
       <div class="yt yt-wide" data-yt="j9A2MTB9gl0" data-title="Listen To SPACE! Transforming Heliophysics Data into Sound"></div>
-      <p class="pg-caption">NASA Video &middot; Data audification &amp; video production by Robert Alexander</p>
     </div>
   </section>
 
@@ -110,7 +108,7 @@
       <div class="pg-head">
         <div class="section-label">Sound as experience</div>
         <h2 class="pg-title">Step inside <em>the data</em></h2>
-        <p class="pg-body">Space physics becomes an immersive interactive experience.</p>
+        <p class="pg-body">Space physics becomes immersive and interactive.</p>
       </div>
       <div class="yt-pair">
         <figure class="yt-fig">
@@ -123,7 +121,7 @@
           <figcaption><strong><a class="fig-title-link" href="https://store.steampowered.com/app/1445700/The_Edgar_Mitchell_Overview_Effect_VR_Experience/" target="_blank" rel="noopener">The Edgar Mitchell Overview Effect</a></strong><span>VR experience &middot; Immersive VR Education</span></figcaption>
         </figure>
       </div>
-      <a class="ghost-link" href="#contact" data-jump="work-with-robert">Connect <span class="ghost-arrow">&rarr;</span></a>
+      <a class="ghost-link" href="#connect" data-jump="work-with-robert">Connect <span class="ghost-arrow">&rarr;</span></a>
     </div>
   </section>
 
@@ -155,7 +153,7 @@
             <span class="pg-card-text">&ldquo;TikTok star JVKE announces new version of golden hour featuring sounds from NASA library&rdquo;</span>
           </a>
         </div>
-        <a class="ghost-link" href="#contact" data-jump="work-with-robert">Connect <span class="ghost-arrow">&rarr;</span></a>
+        <a class="ghost-link" href="#connect" data-jump="work-with-robert">Connect <span class="ghost-arrow">&rarr;</span></a>
       </div>
       <div class="pg-right">
         <div class="yt" data-yt="PLkRJA_7_Lo" data-title="JVKE - golden hour (ft. The Sun) [Sunlover-Starchaser Edit]"></div>
@@ -184,7 +182,7 @@
           <div class="instrument-visual sequencer-visual">
             <div class="seq-grid" id="seq-grid"></div>
           </div>
-          <h3><span class="contact-accent-word" style="color: var(--accent);">Solar</span> Sequencer</h3>
+          <h3>Solar <span class="contact-accent-word" style="color: var(--accent);">Sequencer</span></h3>
           <p>A rhythmic pattern generator using audified satellite data as source material. Click cells to change the beat.</p>
         </div>
         <div class="instrument-card">
@@ -202,22 +200,20 @@
             </div>
             <canvas id="synth-wave-canvas"></canvas>
           </div>
-          <h3><span class="contact-accent-word" style="color: var(--accent);">Solar</span> Synth</h3>
+          <h3>Solar <span class="contact-accent-word" style="color: var(--accent);">Synth</span></h3>
           <p>A wavetable synthesizer that loads audified satellite data as oscillator sources. Play the magnetosphere.</p>
         </div>
         <a class="instrument-card meditate-card" href="https://meditatewiththesun.com/" target="_blank" rel="noopener">
           <div class="instrument-visual catalog-visual meditate-visual" aria-hidden="true">
             <div class="sun-breath">
-              <span class="sun-ring r5"></span>
-              <span class="sun-ring r4"></span>
-              <span class="sun-ring r3"></span>
-              <span class="sun-ring r2"></span>
-              <span class="sun-ring r1"></span>
-              <span class="sun-core"></span>
+              <picture class="sun-img">
+                <source srcset="images/meditate-sun.webp?v=2" type="image/webp">
+                <img src="images/meditate-sun.jpg?v=2" alt="" width="1200" height="871" loading="lazy" decoding="async">
+              </picture>
             </div>
           </div>
           <h3><span class="contact-accent-word" style="color: var(--accent);">Meditate</span> with the Sun</h3>
-          <p>Raw solar data, streaming as sound and light. Breathe it in.<br><span class="meditate-arrow">&rarr;</span></p>
+          <p class="meditate-text">Raw solar data, streaming as sound and light. Breathe&nbsp;it&nbsp;in.&nbsp;<span class="meditate-arrow">&rarr;</span></p>
         </a>
         </div>
       </div>
@@ -374,12 +370,12 @@
 
   <!-- Page order + links. Classic script: runs before the modules below, so
        the DOM is in its final order before visuals/audio initialize. -->
-  <script src="js/pages.js?v=9"></script>
+  <script src="js/pages.js?v=10"></script>
   <script src="js/rays.js?v=9"></script>
   <script type="module" src="js/audio.js?v=10"></script>
   <script type="module" src="js/visuals.js?v=36"></script>
   <script type="module" src="js/main.js?v=42"></script>
   <script src="js/contact-form.js?v=6"></script>
-  <script type="module" src="js/sonify.js?v=10"></script>
+  <script type="module" src="js/sonify.js?v=12"></script>
 </body>
 </html>

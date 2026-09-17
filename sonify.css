@@ -1050,3 +1050,107 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 .wwr-body .wwr-question { margin-right: 0.3em; }
 /* Work with page only: momentum scrolling up inside it stops at its top edge. */
 #contact { scroll-snap-stop: always; }
+/* NASA video page: headline on one line on desktop */
+#education .pg-head { max-width: none; }
+#education .pg-title { white-space: nowrap; font-size: clamp(1.5rem, 2.6vw, 2.6rem); }
+.is-mobile #education .pg-title { white-space: normal; font-size: 1.9rem; }
+
+/* Desktop hero: the down arrow never falls below the bottom of the screen on short windows.
+   Its gap under the caption shrinks so it stays ~3rem above the hero's bottom edge. */
+html:not(.is-mobile) .scroll-hint .section-down-chevron {
+  margin-top: min(12rem, max(0px, calc(100vh - var(--hero-scroll-hint-top, calc(100vh - 232px)) - 4.5rem)));
+}
+
+/* Desktop: bigger videos on the Sound as experience page */
+html:not(.is-mobile) #vision .pg-content { max-width: 1560px; }
+html:not(.is-mobile) #vision .yt-pair { max-width: 1480px; gap: 2.5rem; }
+html:not(.is-mobile) #vision .yt-fig .yt { max-width: calc((100vh - 380px) * 1.7778); }
+
+/* Meditate visual: real SDO sun image in place of the drawn core.
+   The disk is ~80% of the image, so a 50%-wide image gives a ~40% disk (same as before). */
+.sun-img {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 50%;
+  height: 50%;
+  display: block;
+  pointer-events: none;
+}
+.sun-img img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 50%;
+  mix-blend-mode: screen; /* the image's black background disappears into the card */
+  -webkit-mask-image: radial-gradient(circle, #000 58%, transparent 71%);
+  mask-image: radial-gradient(circle, #000 58%, transparent 71%);
+}
+
+/* Rings breathe like orbits: each has its own innermost size so none ever touches
+   the sun (disk ~40%) and no ring passes the one inside it. */
+.sun-ring.r1 { --ring-min: 0.93; }  /* 56% -> 52% at its closest */
+.sun-ring.r2 { --ring-min: 0.85; }  /* 68% -> 58% */
+.sun-ring.r3 { --ring-min: 0.86; }  /* 80% -> 69% */
+.sun-ring.r4 { --ring-min: 0.88; }  /* 91% -> 80% */
+.sun-ring.r5 { --ring-min: 0.92; }  /* 100% -> 92% */
+@keyframes ringBreath {
+  0%, 100% { transform: scale(var(--ring-min, 0.9)); opacity: 0.25; }
+  50%      { transform: scale(1);                    opacity: 0.7; }
+}
+
+/* Keep "Breathe it in." together; balance the lines so nothing is left alone */
+.meditate-text { text-wrap: pretty; }
+
+/* Meditate visual: no rings, just the sun, as large as the visual allows */
+.sun-ring { display: none !important; }
+.meditate-visual { background: none; }
+.sun-breath { width: auto; height: 100%; aspect-ratio: 1 / 1; max-width: 100%; animation: none; }
+.is-mobile .meditate-card .sun-breath { width: auto; height: 100%; }
+.sun-img { width: 100%; height: 100%; }
+/* Meditate card image: the sun fills the top of the card, cropped by the card's own
+   corners like a photo header, fading softly into the card below. */
+.meditate-card .meditate-visual {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  border-radius: 12px 12px 0 0;
+  background: #000;
+}
+.meditate-card .sun-breath { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; aspect-ratio: auto; }
+.meditate-card .sun-img { position: absolute; inset: 0; margin: 0; width: 100%; height: 100%; }
+.meditate-card .sun-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 50%;
+  border-radius: 0;
+  mix-blend-mode: normal;
+  -webkit-mask-image: none;
+  mask-image: none;
+  transform: scale(1.12);          /* a touch closer on the disk */
+  transition: transform 1.2s ease;
+}
+.meditate-card:hover .sun-img img { transform: scale(1.16); }
+.meditate-card .meditate-visual::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 38%;
+  background: linear-gradient(to bottom, rgba(22, 22, 32, 0), #161620);
+  pointer-events: none;
+}
+/* Phones: the card sits on the starfield, so the image is its own rounded tile */
+.is-mobile .meditate-card .meditate-visual { height: 300px !important; border-radius: 14px; }
+.is-mobile .meditate-card .meditate-visual::after { background: linear-gradient(to bottom, rgba(6, 6, 8, 0), rgba(6, 6, 8, 0.55)); }
+
+/* Desktop, Play the Sun: taller cards, content lifted ~10% of the screen.
+   The synth and Meditate visuals match the sequencer's height (main.js), so padding the
+   sequencer makes all three taller together. */
+html:not(.is-mobile) #stem-music .sequencer-visual { padding-block: 1.1rem; }
+html:not(.is-mobile) #stem-music .instrument-card h3 { padding-top: 1.5rem; }
+html:not(.is-mobile) #stem-music .instrument-card p { padding-bottom: 1.9rem; }
+html:not(.is-mobile) #stem-music .music-content { margin-top: -10vh; }
+/* Wide starfield frame: show the whole frame, sun a bit smaller, black matches the image edges */
+.meditate-card .sun-img img { object-fit: contain; transform: scale(1); }
+.meditate-card:hover .sun-img img { transform: scale(1.04); }
