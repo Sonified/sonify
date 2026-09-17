@@ -798,7 +798,7 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 
 /* Phones: page gaps 40% tighter (was 9.5rem top / 8.5rem bottom) */
 .is-mobile #vision, .is-mobile #stem-music, .is-mobile #contact, .is-mobile #qr,
-.is-mobile #education, .is-mobile #citizen-science { padding-top: 5.7rem; padding-bottom: 5.1rem; }
+.is-mobile #education, .is-mobile #citizen-science { padding-top: 6.27rem; padding-bottom: 5.61rem; }
 
 /* Phones: no static glow wash on Play the Sun either (starfield only) */
 .is-mobile .music-bg { display: none !important; }
@@ -811,3 +811,6 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 .wwr-logo:hover img { opacity: 0.92; }
 .wwr-logos, .wwr-logo, .wwr-logo img { -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; -webkit-user-drag: none; }
 .wwr-logo img { pointer-events: none; }
+
+/* Phones: 30% more room above Listen to Space (6.27rem -> 8.15rem) */
+.is-mobile #education { padding-top: 8.15rem; }
