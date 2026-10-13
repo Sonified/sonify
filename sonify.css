@@ -1049,6 +1049,18 @@ html.is-mobile body { overflow: visible !important; height: auto !important; }
 .is-mobile .wwr-body .wwr-question { font-size: inherit; }
 /* Italic "?" leans into the following space; give it a little extra room */
 .wwr-body .wwr-question { margin-right: 0.3em; }
+/* Inline links in the body text: gold with a soft underline that firms up on hover */
+.wwr-body > a {
+  text-decoration: underline 1px;
+  text-decoration-color: color-mix(in srgb, currentColor 50%, transparent);
+  text-underline-offset: 0.2em;
+  transition: text-decoration-color 0.25s ease, filter 0.25s ease;
+}
+.wwr-body > a:hover {
+  opacity: 1;
+  text-decoration-color: currentColor;
+  filter: brightness(1.15);
+}
 /* Work with page only: momentum scrolling up inside it stops at its top edge. */
 #contact { scroll-snap-stop: always; }
 /* NASA video page: headline on one line on desktop */
